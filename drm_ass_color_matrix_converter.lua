@@ -1,3 +1,8 @@
+-- This script can be used to saturate the color so that subtitle made with matrix BT.601 can fit it a script made with matrix BT.709, or vice versa
+-- In other words, it can convert the color matrix of the script
+-- Users of Aegisub 2.* and 3.0.* should use the lua version, and users of version 3.1 or later should use the moonscript version
+-- If you want to convert the whole file (or several files), you should use the C# version as it's much faster and supports batch processing
+
 script_name = "Color Matrix Converter"
 script_description = "Saturates the colors so that subtitles made with matrix BT.601 can fit in scripts made with matrix BT.709, or vice versa"
 script_author = "dreamer2908"

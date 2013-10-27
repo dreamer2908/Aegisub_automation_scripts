@@ -1,16 +1,26 @@
 ﻿== Introduction ==
 
 I wrote/am writing/will write some automation scripts for Aegisub, and I just put them here. They might be useful, useless, or even dangerous, depending on my mood and what crazy idea I have in mind. These scripts are not guaranteed not only to work and produce something useful, but also to not blow your Aegisub, kill your cat, or make your girlfriend dump you, etc. Use them at your own risk; you have been warned. Huehuehue.
+
 Oh right, most should have "drm_" as prefix just to reduce the level of messiness in your autoload folder.
 
 == ASS Color Matrix Converter ==
+
 Long long ago, before the first hu— Err, not that old. Before the age of high-defination media, most video files are BT.601-compliant standard-defination. vsfilter also used matrix coefficients defined in BT.601 standard to convert colors in ASS subtitles, which is either BGR or ABGR with 8-bit per channel, into YUV, which most renderers use. At the same time, libass used BT.601 to deal with SD videos and ASS subtitles, too. And Aegisub's decoder, too, used BT.601 to decode SD videos to computer RGB. Life was good as everyone worked in the same way. 
+
 However, goodness never lasts: here came the HD era and its new standard—BT.709. BT.709 itself is an improvement, as it allows higher both spatial and temporary resolution, and a lot more colors, which are forbidden in BT.601. ffms2, Aegisub's decoder, started using BT.709 to decode HD video; that's correct. libass-based video player like mplayer also started to do the same, and also use BT.709 to deal with ASS subtitles; that's also correct. Life was good as everyone worked in— Err, I forgot someone. vsfilter, unfortunately, used and only used BT.601 to render subtitles. Here we went the mess: to deal with vsfilter's incompetence, people used the following "solution", which I call a dirty hack: forcing ffms2 to decode all videos with BT.601, and creating subtitles in that weird environment—Yes, displaying the video incorrectly and working on it—so that colors would match on playback with vsfilter. This "solution" makes libass look wrong even though libass *is* the one doing right. If you're using Aegisub 3.0.x and doesn't touch any advanced settings, yes, unfortunately, you're using this "solution".
+
 As the time went by, a new subtitle render appeared: xy-vsfilter—Well, it's not actually new, but just ignore it. It's much faster than both vsfilter and libass, supports BT.709 the new standard, and introduces a new field (flag): YCbCr Matrix. As long as the creator flags the subtitle correctly, the subtitle renderer can finally display the subtile the same way as how it was created. If you create the subtitle in BT.601, it will be displayed in BT.601 way; if you create it in BT.709, it will be displayed in BT.709 way. And the brilliant upcomming mpv, which uses libass, also supports this flag.
+
 Now we can finally do thing in the way it's supposed to be, right? Who cares about those leechers who's still using some ridiculously old piece of software from the Stone Age?
+
 Oh, don't bother to read the above paragraphs, btw.
+
 This script can be used to convert the color matrix of the subtitles so that subtitles made with matrix BT.601 can fit it a script made with matrix BT.709 and vice versa, and you can adapt the existing subtitles to the correct working environment.
+
 Usage: Copy it to your autoload folder. The macro's name is "Color Matrix Converter". Select conversion mode ("BT.601 to BT.709" or "BT.709 to BT.601"); whether you want to convert selected lines, styles, or everything; and whether you want it to set the YCbCr Matrix field for you. Click OK; that's all. 
+
 Users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_ass_color_matrix_converter.lua drm_ass_color_matrix_converter.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_ass_color_matrix_converter.moon drm_ass_color_matrix_converter.moon]) as it's the main version. If you want to convert the whole file (or several files), you should use [https://www.dropbox.com/s/1gfjwcn0p6z60tw/ASSColorMatrixConverter_beta8.7z the C# version] as it's much faster, more reliable and supports batch processing.
+
 
 Goodbye*
