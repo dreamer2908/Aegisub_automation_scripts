@@ -1,4 +1,5 @@
-﻿== Introduction ==
+
+== Introduction ==
 
 I wrote/am writing/will write some automation scripts for Aegisub, and I just put them here. They might be useful, useless, or even dangerous, depending on my mood and what crazy idea I have in mind. These scripts are not guaranteed not only to work and produce something useful, but also to not blow your Aegisub, kill your cat, or make your girlfriend dump you, etc. Use them at your own risk; you have been warned. Huehuehue.
 
