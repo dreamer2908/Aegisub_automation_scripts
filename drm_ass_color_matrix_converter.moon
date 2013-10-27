@@ -6,7 +6,7 @@
 export script_name        = "Color Matrix Converter"
 export script_description = "Adjusts the color so that subtitles made with matrix BT.601 can fit in scripts made with matrix BT.709, or vice versa"
 export script_author      = "dreamer2908"
-export script_version     = "0.1.0"
+export script_version     = "0.1.1"
 
 local *
 
@@ -93,7 +93,7 @@ digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[3][3] = 0 / 256.0
 bt601_to_bt709 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601)
 bt709_to_bt601 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709)
 
-mode = 1
+export mode = 1
 matrixTable = {bt601_to_bt709, bt709_to_bt601}
 modeTable = {"BT.601 to BT.709", "BT.709 to BT.601"}
 tableMode = {"BT.601 to BT.709":1,"BT.709 to BT.601":2}

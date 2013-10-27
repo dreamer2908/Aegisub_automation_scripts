@@ -6,8 +6,8 @@
 script_name = "Color Matrix Converter"
 script_description = "Saturates the colors so that subtitles made with matrix BT.601 can fit in scripts made with matrix BT.709, or vice versa"
 script_author = "dreamer2908"
-script_version = "0.1.0"
-local createMatrix, matrixMultiplication, printMatrix, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, bt601_to_bt709, bt709_to_bt601, mode, matrixTable, modeTable, tableMode, fieldTable, hexTable, hexTableInit, Dec2Hex, DecToHex, HexToDec, convertColor, convertLine, drm_convertAll, drm_convertSelected, drm_convertStyles, drm_setYCyCrField, convertSubtitle, mainDialog, macro_function, macro_validation
+script_version = "0.1.1"
+local createMatrix, matrixMultiplication, printMatrix, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, bt601_to_bt709, bt709_to_bt601, matrixTable, modeTable, tableMode, fieldTable, hexTable, hexTableInit, Dec2Hex, DecToHex, HexToDec, convertColor, convertLine, drm_convertAll, drm_convertSelected, drm_convertStyles, drm_setYCyCrField, convertSubtitle, mainDialog, macro_function, macro_validation
 createMatrix = function(n, m)
   if n == 3 and m == 1 then
     return {
