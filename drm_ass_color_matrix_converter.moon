@@ -6,7 +6,7 @@
 export script_name        = "Color Matrix Converter"
 export script_description = "Adjusts the color so that subtitles made with matrix BT.601 can fit in scripts made with matrix BT.709, or vice versa"
 export script_author      = "dreamer2908"
-export script_version     = "0.1.1"
+export script_version     = "0.1.2"
 
 local *
 
@@ -93,7 +93,7 @@ digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[3][3] = 0 / 256.0
 bt601_to_bt709 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601)
 bt709_to_bt601 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709)
 
-export mode = 1
+mode = 1
 matrixTable = {bt601_to_bt709, bt709_to_bt601}
 modeTable = {"BT.601 to BT.709", "BT.709 to BT.601"}
 tableMode = {"BT.601 to BT.709":1,"BT.709 to BT.601":2}
@@ -161,14 +161,15 @@ convertLine = (line) ->
 	return result
 	
 -- What to convert
-export drm_convertAll = false
-export drm_convertSelected = true
-export drm_convertStyles = false
-export drm_setYCyCrField = false
+drm_convertAll = false
+drm_convertSelected = true
+drm_convertDialog = false
+drm_convertStyles = false
+drm_setYCyCrField = false
 -- Real job here. drm_convertAll doesn't work in the same way as the C# version as line.raw is read-only *facepalms*
 convertSubtitle = (subtitle, selected, active) ->
 	num_lines = #subtitle	
-	if drm_convertAll
+	if drm_convertDialog or drm_convertAll
 		for i = 1, num_lines
 			line = subtitle[i]
 			if line.class == "dialogue"
@@ -222,20 +223,24 @@ mainDialog = {
 	{class:"label",x:0,y:0,width:1,height:1,label:"Mode:"},
 	{class:"dropdown",x:1,y:0,width:2,height:1,name:"modeselect",items:modeTable,value:"BT.601 to BT.709"},
 	{class:"checkbox",x:0,y:1,width:2,height:1,name:"convertSelected",label:"Convert selected lines",value:false},
-	{class:"checkbox",x:0,y:2,width:2,height:1,name:"convertStyles",label:"Convert styles",value:false},
-	{class:"checkbox",x:0,y:3,width:2,height:1,name:"setYCyCrField",label:"Set YCbCr Matrix field",value:false},
-	{class:"checkbox",x:0,y:4,width:2,height:1,name:"convertAll",label:"ALL of above",value:false},
+	{class:"checkbox",x:0,y:2,width:2,height:1,name:"convertDialog",label:"Convert all lines",value:false},
+	{class:"checkbox",x:0,y:3,width:2,height:1,name:"convertStyles",label:"Convert styles",value:false},
+	{class:"checkbox",x:0,y:4,width:2,height:1,name:"setYCyCrField",label:"Set YCbCr Matrix field",value:false},
+	{class:"checkbox",x:0,y:5,width:2,height:1,name:"convertAll",label:"ALL of above",value:false},
 }
 macro_function = (subtitle, selected, active) ->
+	mainDialog[2]["value"] = modeTable[mode]
 	mainDialog[3]["value"] = drm_convertSelected
-	mainDialog[4]["value"] = drm_convertStyles
-	mainDialog[5]["value"] = drm_setYCyCrField
-	mainDialog[6]["value"] = drm_convertAll
+	mainDialog[4]["value"] = drm_convertDialog
+	mainDialog[5]["value"] = drm_convertStyles
+	mainDialog[6]["value"] = drm_setYCyCrField
+	mainDialog[7]["value"] = drm_convertAll
 	pressed, results = aegisub.dialog.display(mainDialog, {"OK", "Cancel"},{cancel:"Cancel"})
 	if pressed == "OK"
 		aegisub.progress.set math.random(100) -- professional progress bars
 		mode = tableMode[results.modeselect] -- >mfw I cast the wrong type and wondered why it didn't work
 		drm_convertSelected = results.convertSelected
+		drm_convertDialog = results.convertDialog
 		drm_convertStyles = results.convertStyles
 		drm_setYCyCrField = results.setYCyCrField
 		drm_convertAll = results.convertAll

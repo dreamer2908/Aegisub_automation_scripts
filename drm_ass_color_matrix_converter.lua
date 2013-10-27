@@ -1,13 +1,8 @@
--- This script can be used to saturate the color so that subtitle made with matrix BT.601 can fit it a script made with matrix BT.709, or vice versa
--- In other words, it can convert the color matrix of the script
--- Users of Aegisub 2.* and 3.0.* should use the lua version, and users of version 3.1 or later should use the moonscript version
--- If you want to convert the whole file (or several files), you should use the C# version as it's much faster and supports batch processing
-
 script_name = "Color Matrix Converter"
-script_description = "Saturates the colors so that subtitles made with matrix BT.601 can fit in scripts made with matrix BT.709, or vice versa"
+script_description = "Adjusts the color so that subtitles made with matrix BT.601 can fit in scripts made with matrix BT.709, or vice versa"
 script_author = "dreamer2908"
-script_version = "0.1.1"
-local createMatrix, matrixMultiplication, printMatrix, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, bt601_to_bt709, bt709_to_bt601, matrixTable, modeTable, tableMode, fieldTable, hexTable, hexTableInit, Dec2Hex, DecToHex, HexToDec, convertColor, convertLine, drm_convertAll, drm_convertSelected, drm_convertStyles, drm_setYCyCrField, convertSubtitle, mainDialog, macro_function, macro_validation
+script_version = "0.1.2"
+local createMatrix, matrixMultiplication, printMatrix, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, bt601_to_bt709, bt709_to_bt601, mode, matrixTable, modeTable, tableMode, fieldTable, hexTable, hexTableInit, Dec2Hex, DecToHex, HexToDec, convertColor, convertLine, drm_convertAll, drm_convertSelected, drm_convertDialog, drm_convertStyles, drm_setYCyCrField, convertSubtitle, mainDialog, macro_function, macro_validation
 createMatrix = function(n, m)
   if n == 3 and m == 1 then
     return {
@@ -211,11 +206,12 @@ convertLine = function(line)
 end
 drm_convertAll = false
 drm_convertSelected = true
+drm_convertDialog = false
 drm_convertStyles = false
 drm_setYCyCrField = false
 convertSubtitle = function(subtitle, selected, active)
   local num_lines = #subtitle
-  if drm_convertAll then
+  if drm_convertDialog or drm_convertAll then
     for i = 1, num_lines do
       local line = subtitle[i]
       if line.class == "dialogue" then
@@ -307,6 +303,16 @@ mainDialog = {
     y = 2,
     width = 2,
     height = 1,
+    name = "convertDialog",
+    label = "Convert all lines",
+    value = false
+  },
+  {
+    class = "checkbox",
+    x = 0,
+    y = 3,
+    width = 2,
+    height = 1,
     name = "convertStyles",
     label = "Convert styles",
     value = false
@@ -314,7 +320,7 @@ mainDialog = {
   {
     class = "checkbox",
     x = 0,
-    y = 3,
+    y = 4,
     width = 2,
     height = 1,
     name = "setYCyCrField",
@@ -324,7 +330,7 @@ mainDialog = {
   {
     class = "checkbox",
     x = 0,
-    y = 4,
+    y = 5,
     width = 2,
     height = 1,
     name = "convertAll",
@@ -333,10 +339,12 @@ mainDialog = {
   }
 }
 macro_function = function(subtitle, selected, active)
+  mainDialog[2]["value"] = modeTable[mode]
   mainDialog[3]["value"] = drm_convertSelected
-  mainDialog[4]["value"] = drm_convertStyles
-  mainDialog[5]["value"] = drm_setYCyCrField
-  mainDialog[6]["value"] = drm_convertAll
+  mainDialog[4]["value"] = drm_convertDialog
+  mainDialog[5]["value"] = drm_convertStyles
+  mainDialog[6]["value"] = drm_setYCyCrField
+  mainDialog[7]["value"] = drm_convertAll
   local pressed, results = aegisub.dialog.display(mainDialog, {
     "OK",
     "Cancel"
@@ -347,6 +355,7 @@ macro_function = function(subtitle, selected, active)
     aegisub.progress.set(math.random(100))
     mode = tableMode[results.modeselect]
     drm_convertSelected = results.convertSelected
+    drm_convertDialog = results.convertDialog
     drm_convertStyles = results.convertStyles
     drm_setYCyCrField = results.setYCyCrField
     drm_convertAll = results.convertAll
