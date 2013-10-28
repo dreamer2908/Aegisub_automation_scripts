@@ -27,7 +27,7 @@ script_author = "dreamer2908"
 script_version = "0.1.0"
 local config_file = "drm_template_based_typesetting.conf"
 local storage, currentSet, current, loadTemplate, saveTemplate, getTemplateList, getSetList, removeTemplate, createNewSet, removeSet, checkSanity, storeNewLayerInfo, parseCFLine, applyConfig, configscope, loadConfig, generateCFText, storeConfig, applyTemplate, subTemplate, mainDialog, managerDialog, templateApplyingFunction, templateManager
-require("clipboard")
+-- require("clipboard")
 include("utils.lua")
 storage = {
   ["set1"] = {

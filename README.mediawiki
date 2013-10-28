@@ -23,5 +23,37 @@ Usage: Copy it to your autoload folder. The macro's name is "Color Matrix Conver
 
 Users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_ass_color_matrix_converter.lua drm_ass_color_matrix_converter.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_ass_color_matrix_converter.moon drm_ass_color_matrix_converter.moon]) — it's the main version. In case you want to convert the whole file (or several files), you should use [https://www.dropbox.com/s/1gfjwcn0p6z60tw/ASSColorMatrixConverter_beta8.7z the C# version] as it's much faster, more reliable and supports batch processing. Lua/Moonscript version is just a little more handy.
 
+== Template-based Typesetting Tool ==
+
+This script is written to save time when typesetting several similar signs. You can just create a template, time the signs, and then apply it to them; that's all. Using this to keep consistent between several scripts is fine, too.
+
+The configuration file is supposed to be stored in automation/autoload folder, the same as this script. All templates and settings are stored there. 
+
+NO settings or template manager is provided. You must MANUALLY edit the configuration. This is probably enough to scare away many bad and lazy typesetters. There's something called "Template manager", but actually, it's just a handy dialog to edit the configuration. Aegisub dialog for automation scripts is too simple for any efficient manager anyway. 
+
+=== Configuration file format ===
+
+Setting lines start with "$", and template lines start with "#". Everything else is ignored.
+
+Setting lines are in the following format: $variable=value. Only currentSet is used at the moment.
+
+Template lines are in the following format: #set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add
+
+If the template consists of several layers, put each layer in a separated template line. You can group templates by set. The active set is determined by currentSet. If style_name is empty, the original style of the line is reserved.
+
+Do NOT put any comma in set_name, template_name, or style_name. Seriously, this script will break if you do that :/
+
+There're a few sample templates; feel free to delete them.
+
+Examples:
+$currentSet=set1
+#set1,Nase Mitsuki,1,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur4\bord1.1\3c&HFFFFFF&}
+#set1,Nase Mitsuki,0,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur0.5\3c&HFFFFFF&}
+
+=== Usage ===
+
+Self-explained. Too easy.
+
+As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.lua drm_template_based_typesetting.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.moon drm_template_based_typesetting.moon]) — it's the main version. 
 
 Goodbye*
