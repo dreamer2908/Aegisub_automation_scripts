@@ -4,7 +4,7 @@
 -- The configuration file is supposed to be stored in automation/autoload folder, the same as this script. 
 -- All templates and settings are stored there. No settings or template manager is provided. 
 -- You must MANUALLY edit the configuration. This is probably enough to scare away many bad and lazy typesetters.
--- There's something called "Template manager", but actually, it's just a handy dialog to edit the configuration.
+-- I made something called "Template manager"; actually, it's merely a handy dialog to edit the configuration.
 -- Aegisub dialog for automation scripts is too simple for any efficient manager anyway. 
 -- Setting lines start with "$", and template lines start with "#". Everything else is ignored.
 -- Setting lines are in the following format: $variable=value. Only currentSet is used at the moment.
@@ -24,13 +24,13 @@
 export script_name        = "Template-based typesetting tool"
 export script_description = "Create a template, time the signs, and apply it to them; that's all. It's useful when there're many similar signs, or you want to keep consistent between scripts."
 export script_author      = "dreamer2908"
-export script_version     = "0.1.0"
+export script_version     = "0.1.1"
 
 config_file = "drm_template_based_typesetting.conf"
 
 local *
 
-require "clipboard" -- for testing only
+-- require "clipboard" -- for testing only
 include("utils.lua")
 
 -- Template storage
@@ -112,10 +112,8 @@ storage = {
 	}
 }
 
-
 -- Current template is stored here
-currentSet = ""
-current = 
+emptyTemplate = 
 	layerCount: 0,
 	layer: {},
 	startTimeOffset: {},
@@ -126,9 +124,16 @@ current =
 	margin_t: {},
 	margin_b: {},
 	template: {}
+currentSet = ""
+current = emptyTemplate
 	
 loadTemplate = (set, index) ->
-	current = table.copy(storage[set][index])
+	if storage[set] ~= nil
+		if storage[set][index] ~= nil 
+			current = table.copy(storage[set][index])
+		else 
+			current = emptyTemplate
+	else current = emptyTemplate
 	
 saveTemplate = (set, index) ->
 	if storage[set] == nil 
@@ -138,36 +143,20 @@ saveTemplate = (set, index) ->
 getTemplateList = (set) ->
 	list = {}
 	num = 0
-	for i,v in pairs(storage[set])
-		num += 1
-		list[num] = i
+	if storage[set] ~= nil
+		for i,v in pairs(storage[set])
+			num += 1
+			list[num] = i
 	return list
 		
 getSetList = () ->
 	list = {}
 	num = 0
-	for i,v in pairs(storage)
-		num += 1
-		list[num] = i
+	if storage ~= nil 
+		for i,v in pairs(storage)
+			num += 1
+			list[num] = i
 	return list
-			
-removeTemplate = (set, index) ->
-	newset = {}
-	for i,v in pairs(storage[set])
-		if i ~= index
-			newset[i] = v
-	storage[set] = newset
-
-createNewSet = (setname) ->
-	if storage[setname] == nil
-		storage[setname] == {}
-			
-removeSet = (set) ->
-	newstorage = {}
-	for i,v in pairs(storage)
-		if i ~= set
-			newstorage[i] = v
-	storage = newstorage
 
 -- only verifies currentSet for now
 checkSanity = () ->
@@ -194,7 +183,7 @@ storeNewLayerInfo = (set, index, layer, startTimeOffset, endTimeOffset, style, m
 			margin_t: {},
 			margin_b: {},
 			template: {}
-	-- increases layerCount and add layer info
+	-- increases layerCount and add more layer info
 	cur = storage[set][index]
 	currentLayer = cur.layerCount + 1
 	cur.layerCount = currentLayer
@@ -281,12 +270,13 @@ loadConfig = () ->
 	if not cf
 		checkSanity!
 		return
-	storage = {} -- nukes out current data
+	storage = {} -- also nukes out current data
 	for line in cf\lines()
 		parseCFLine(line)
 	cf\close()
 	checkSanity!
 	
+-- generates configuration in text format
 generateCFText = () ->
 	result = ""
 	-- writes variable
@@ -308,7 +298,7 @@ storeConfig = () ->
 	io.write(generateCFText())
 	io.output()\close()
 	
--- Main functions
+-- Applies current template to selected lines
 applyTemplate = (subtitle, selected, active) ->
 	-- inverses selected table for easier processing
 	sel2 = {}
@@ -320,11 +310,13 @@ applyTemplate = (subtitle, selected, active) ->
 	for i = 1, n
 		li = sel2[i]
 		line = subtitle[li]
+		-- Assuming the template is valid
 		for k = 1,current.layerCount
 			thislayer = subTemplate(line,k)
 			subtitle.insert(li+k-1,thislayer)
-		subtitle.delete(li+current.layerCount)
-
+		if current.layerCount > 0 subtitle.delete(li+current.layerCount) -- no longer nukes out the line when no template is available
+		
+-- Creates a new layer (line) from layer i-th info in current template
 subTemplate = (line, i) ->
 	result = table.copy(line)
 	result.comment = false
@@ -351,9 +343,12 @@ managerDialog = {
 
 -- Main macro to apply template
 templateApplyingFunction = (subtitle, selected, active) ->
-	loadConfig! -- Do that now!
+	--storage = {}
+	--storeConfig!
+	loadConfig!
 	mainDialog[2]["items"] = getTemplateList(currentSet)
-	mainDialog[2]["value"] = mainDialog[2]["items"][1]
+	if #mainDialog[2]["items"] > 0 
+		mainDialog[2]["value"] = mainDialog[2]["items"][1]
 	pressed, results = aegisub.dialog.display(mainDialog, {"OK", "Cancel"}, {cancel:"Cancel"})
 	if pressed == "OK"
 		loadTemplate("set1", results.templateselect)	

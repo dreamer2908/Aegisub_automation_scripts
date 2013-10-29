@@ -43,8 +43,6 @@ If the template consists of several layers, put each layer in a separated templa
 
 Do NOT put any comma in set_name, template_name, or style_name. Seriously, this script will break if you do that :/
 
-There're a few sample templates; feel free to delete them.
-
 Examples:
 
 <code>
@@ -56,6 +54,8 @@ $currentSet=set1
 <code>
 #set1,Nase Mitsuki,0,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur0.5\3c&HFFFFFF&}
 </code>
+
+Take a look at my sample configuration file ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/samples/drm_template_based_typesetting.conf drm_template_based_typesetting.conf]) if you're still unsure.
 
 === Usage ===
 

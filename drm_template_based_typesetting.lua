@@ -4,7 +4,7 @@
 -- The configuration file is supposed to be stored in automation/autoload folder, the same as this script. 
 -- All templates and settings are stored there. No settings or template manager is provided. 
 -- You must MANUALLY edit the configuration. This is probably enough to scare away many bad and lazy typesetters.
--- There's something called "Template manager", but actually, it's just a handy dialog to edit the configuration.
+-- I made something called "Template manager"; actually, it's merely a handy dialog to edit the configuration.
 -- Aegisub dialog for automation scripts is too simple for any efficient manager anyway. 
 -- Setting lines start with "$", and template lines start with "#". Everything else is ignored.
 -- Setting lines are in the following format: $variable=value. Only currentSet is used at the moment.
@@ -24,10 +24,9 @@
 script_name = "Template-based typesetting tool"
 script_description = "Create a template, time the signs, and apply it to them; that's all. It's useful when there're many similar signs, or you want to keep consistent between scripts."
 script_author = "dreamer2908"
-script_version = "0.1.0"
+script_version = "0.1.1"
 local config_file = "drm_template_based_typesetting.conf"
-local storage, currentSet, current, loadTemplate, saveTemplate, getTemplateList, getSetList, removeTemplate, createNewSet, removeSet, checkSanity, storeNewLayerInfo, parseCFLine, applyConfig, configscope, loadConfig, generateCFText, storeConfig, applyTemplate, subTemplate, mainDialog, managerDialog, templateApplyingFunction, templateManager
--- require("clipboard")
+local storage, emptyTemplate, currentSet, current, loadTemplate, saveTemplate, getTemplateList, getSetList, checkSanity, storeNewLayerInfo, parseCFLine, applyConfig, configscope, loadConfig, generateCFText, storeConfig, applyTemplate, subTemplate, mainDialog, managerDialog, templateApplyingFunction, templateManager
 include("utils.lua")
 storage = {
   ["set1"] = {
@@ -240,8 +239,7 @@ storage = {
     }
   }
 }
-currentSet = ""
-current = {
+emptyTemplate = {
   layerCount = 0,
   layer = { },
   startTimeOffset = { },
@@ -253,8 +251,18 @@ current = {
   margin_b = { },
   template = { }
 }
+currentSet = ""
+current = emptyTemplate
 loadTemplate = function(set, index)
-  current = table.copy(storage[set][index])
+  if storage[set] ~= nil then
+    if storage[set][index] ~= nil then
+      current = table.copy(storage[set][index])
+    else
+      current = emptyTemplate
+    end
+  else
+    current = emptyTemplate
+  end
 end
 saveTemplate = function(set, index)
   if storage[set] == nil then
@@ -265,43 +273,24 @@ end
 getTemplateList = function(set)
   local list = { }
   local num = 0
-  for i, v in pairs(storage[set]) do
-    num = num + 1
-    list[num] = i
+  if storage[set] ~= nil then
+    for i, v in pairs(storage[set]) do
+      num = num + 1
+      list[num] = i
+    end
   end
   return list
 end
 getSetList = function()
   local list = { }
   local num = 0
-  for i, v in pairs(storage) do
-    num = num + 1
-    list[num] = i
+  if storage ~= nil then
+    for i, v in pairs(storage) do
+      num = num + 1
+      list[num] = i
+    end
   end
   return list
-end
-removeTemplate = function(set, index)
-  local newset = { }
-  for i, v in pairs(storage[set]) do
-    if i ~= index then
-      newset[i] = v
-    end
-  end
-  storage[set] = newset
-end
-createNewSet = function(setname)
-  if storage[setname] == nil then
-    return storage[setname] == { }
-  end
-end
-removeSet = function(set)
-  local newstorage = { }
-  for i, v in pairs(storage) do
-    if i ~= set then
-      newstorage[i] = v
-    end
-  end
-  storage = newstorage
 end
 checkSanity = function()
   currentSet = currentSet or ""
@@ -459,7 +448,9 @@ applyTemplate = function(subtitle, selected, active)
       local thislayer = subTemplate(line, k)
       subtitle.insert(li + k - 1, thislayer)
     end
-    subtitle.delete(li + current.layerCount)
+    if current.layerCount > 0 then
+      subtitle.delete(li + current.layerCount)
+    end
   end
 end
 subTemplate = function(line, i)
@@ -522,7 +513,9 @@ managerDialog = {
 templateApplyingFunction = function(subtitle, selected, active)
   loadConfig()
   mainDialog[2]["items"] = getTemplateList(currentSet)
-  mainDialog[2]["value"] = mainDialog[2]["items"][1]
+  if #mainDialog[2]["items"] > 0 then
+    mainDialog[2]["value"] = mainDialog[2]["items"][1]
+  end
   local pressed, results = aegisub.dialog.display(mainDialog, {
     "OK",
     "Cancel"
