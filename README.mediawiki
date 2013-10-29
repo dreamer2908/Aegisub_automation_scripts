@@ -29,7 +29,7 @@ This script is written to save time when typesetting several similar signs. You 
 
 The configuration file is supposed to be stored in automation/autoload folder, the same as this script. All templates and settings are stored there. 
 
-NO settings or template manager is provided. You must MANUALLY edit the configuration. This is probably enough to scare away many bad and lazy typesetters. There's something called "Template manager", but actually, it's just a handy dialog to edit the configuration. Aegisub dialog for automation scripts is too simple for any efficient manager anyway. 
+NO settings or template manager is provided. You must MANUALLY edit the configuration. This is probably enough to scare away many bad and lazy typesetters. I made something called "Template manager", but it's just a handy dialog to edit the configuration. Aegisub dialog for automation scripts is too simple for any efficient manager anyway. 
 
 === Configuration file format ===
 
