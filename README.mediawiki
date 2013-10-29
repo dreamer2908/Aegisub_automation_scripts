@@ -47,15 +47,15 @@ There're a few sample templates; feel free to delete them.
 
 Examples:
 
---><source lang="cpp">
-
+<code>
 $currentSet=set1
-
+</code>
+<code>
 #set1,Nase Mitsuki,1,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur4\bord1.1\3c&HFFFFFF&}
-
+</code>
+<code>
 #set1,Nase Mitsuki,0,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur0.5\3c&HFFFFFF&}
-
-</source><!--
+</code>
 
 === Usage ===
 
