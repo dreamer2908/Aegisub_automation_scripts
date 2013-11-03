@@ -2,19 +2,30 @@
 -- You can just create a template, time the signs, and then apply it to them; that's all. 
 -- Using this to keep consistent between several scripts is fine, too.
 -- The configuration file is supposed to be stored in automation/autoload folder, the same as this script. 
--- All templates and settings are stored there. No settings or template manager is provided. 
--- You must MANUALLY edit the configuration. This is probably enough to scare away many bad and lazy typesetters.
--- I made something called "Template manager"; actually, it's merely a handy dialog to edit the configuration.
--- Aegisub dialog for automation scripts is too simple for any efficient manager anyway. 
--- Setting lines start with "$", and template lines start with "#". Everything else is ignored.
+-- All templates and settings are stored there.
+-- To add/remove/change templates, you need to edit the configuration manually, as NO TEMPLATE MANAGER IS PROVIDED. 
+-- This is probably enough to scare away many bad and lazy typesetters. I did make something called "Template manager", 
+-- but unfortunately, it's just a handy dialog to edit the configuration. 
+-- Aegisub dialog for automation scripts is too simple for any efficient manager anyway.
+
+-- === Configuration file format ===
+
+-- In the configuration file, setting lines start with "$", and template lines start with "#". 
+-- Everything else is ignored. Invalid setting/template lines are also ignored.
 -- Setting lines are in the following format: $variable=value. Only currentSet is used at the moment.
--- Template lines are in the following format:
+-- Template lines are in the following format: 
 -- #set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add
--- If the template consists of several layers, put each layer in a separated template line. 
--- You can group templates by set. The active set is determined by currentSet. 
--- If style_name is empty, the original style of the line is reserved.
--- Do NOT put any comma in set_name, template_name, or style_name. Seriously, this script will break if you do that :/
--- There're a few sample templates; feel free to delete them.
+-- set_name, template_name, and style_name must NOT contain any comma--ASS format also doesn't allow comma in style name.
+-- If the template consists of several layers, put each layer in a separated template line. You can group templates by set. The active set is determined by currentSet. If style_name is empty, the original style of the line is reserved.
+-- A sample configuration file is provided here: 
+-- https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/samples/drm_template_based_typesetting.conf
+-- There're also a few sample templates; feel free to delete them.
+
+-- === Usage ===
+
+-- Open the so-called "Template manager" and add a (bunch of) new template(s). 
+-- Select some lines, click Automation/Apply a template, choose a template from the list, and click "OK" to apply. That's all.
+-- Seriously, don't be lazy.
 -- 
 -- Examples:
 -- $currentSet=set1
@@ -24,7 +35,7 @@
 export script_name        = "Template-based typesetting tool"
 export script_description = "Create a template, time the signs, and apply it to them; that's all. It's useful when there're many similar signs, or you want to keep consistent between scripts."
 export script_author      = "dreamer2908"
-export script_version     = "0.1.1"
+export script_version     = "0.1.2"
 
 config_file = "drm_template_based_typesetting.conf"
 
@@ -261,9 +272,10 @@ applyConfig = (text) ->
 		parseCFLine(v)
 	checkSanity! -- DO IT NOW!
 	
--- it decodes path; that's all	
+-- it decodes path; that's all
 configscope = () ->
-	return aegisub.decode_path("?user/automation/autoload/"..config_file)
+	if aegisub.decode_path ~= nil return aegisub.decode_path("?user/automation/autoload/"..config_file)
+	else return "automation/autoload/"..config_file
 	
 loadConfig = () ->
 	cf = io.open configscope(), 'r' 
