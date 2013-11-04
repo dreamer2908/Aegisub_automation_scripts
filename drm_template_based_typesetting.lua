@@ -1,11 +1,21 @@
 -- This script is written to save time when typesetting several similar signs. 
 -- You can just create a template, time the signs, and then apply it to them; that's all. 
 -- Using this to keep consistent between several scripts is fine, too.
--- The configuration file is supposed to be stored in automation/autoload folder, the same as this script. 
--- All templates and settings are stored there.
+
+-- The configuration file is supposed to be stored in automation/autoload folder, 
+-- the same as this script. All templates and settings are stored there.
+-- If you want it to be somewhere else, change "absolutePath = false" to "absolutePath = true", 
+-- AND replace "drm_template_based_typesetting.conf" with any *absolute* path you want. 
+-- Note that on Windows system, you must use "\\" (two slash) instead of "\" (one slash); 
+-- that is, use "D:\\random\\folder\\template.conf" instead of "D:\random\folder\template.conf". 
+-- If you're on Linux/Unix, a normal path like "/home/me/Desktop/fagging/template.conf" works just fine.
+-- In Aegisub 3.0+ and 2.1.9 WIN32 PORTABLE, path decoding should work well; 
+-- if you're using something else, you MUST set an absolute path as guided above. 
+-- This script won't work without a writable configuration file.
+
 -- To add/remove/change templates, you need to edit the configuration manually, as NO TEMPLATE MANAGER IS PROVIDED. 
--- This is probably enough to scare away many bad and lazy typesetters. I did make something called "Template manager", 
--- but unfortunately, it's just a handy dialog to edit the configuration. 
+-- This is probably enough to scare away many bad and lazy typesetters. 
+-- I did make something called "Template manager", but unfortunately, it's just a handy dialog to edit the configuration. 
 -- Aegisub dialog for automation scripts is too simple for any efficient manager anyway.
 
 -- === Configuration file format ===
@@ -15,8 +25,10 @@
 -- Setting lines are in the following format: $variable=value. Only currentSet is used at the moment.
 -- Template lines are in the following format: 
 -- #set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add
--- set_name, template_name, and style_name must NOT contain any comma--ASS format also doesn't allow comma in style name.
--- If the template consists of several layers, put each layer in a separated template line. You can group templates by set. The active set is determined by currentSet. If style_name is empty, the original style of the line is reserved.
+-- set_name, template_name, and style_name must NOT contain any comma. ASS format also doesn't allow comma in style name.
+-- If the template consists of several layers, put each layer in a separated template line. 
+-- You can group templates by set. The active set is determined by currentSet. 
+-- If style_name is empty, the original style of the line is reserved.
 -- A sample configuration file is provided here: 
 -- https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/samples/drm_template_based_typesetting.conf
 -- There're also a few sample templates; feel free to delete them.
@@ -26,6 +38,7 @@
 -- Open the so-called "Template manager" and add a (bunch of) new template(s). 
 -- Select some lines, click Automation/Apply a template, choose a template from the list, and click "OK" to apply. That's all.
 -- Seriously, don't be lazy.
+-- There're a few sample templates; feel free to delete them.
 -- 
 -- Examples:
 -- $currentSet=set1
@@ -35,8 +48,9 @@
 script_name = "Template-based typesetting tool"
 script_description = "Create a template, time the signs, and apply it to them; that's all. It's useful when there're many similar signs, or you want to keep consistent between scripts."
 script_author = "dreamer2908"
-script_version = "0.1.2"
-local config_file = "drm_template_based_typesetting.conf"
+script_version = "0.1.3"
+local configFile = "drm_template_based_typesetting.conf"
+local absolutePath = false
 local storage, emptyTemplate, currentSet, current, loadTemplate, saveTemplate, getTemplateList, getSetList, checkSanity, storeNewLayerInfo, parseCFLine, applyConfig, configscope, loadConfig, generateCFText, storeConfig, applyTemplate, subTemplate, mainDialog, managerDialog, templateApplyingFunction, templateManager
 include("utils.lua")
 storage = {
@@ -407,10 +421,12 @@ applyConfig = function(text)
   return checkSanity()
 end
 configscope = function()
-  if aegisub.decode_path ~= nil then
-    return aegisub.decode_path("?user/automation/autoload/" .. config_file)
+  if absolutePath then
+    return configFile
+  elseif aegisub.decode_path ~= nil then
+    return aegisub.decode_path("?user/automation/autoload/" .. configFile)
   else
-    return "automation/autoload/" .. config_file
+    return "automation/autoload/" .. configFile
   end
 end
 loadConfig = function()
@@ -541,7 +557,7 @@ templateApplyingFunction = function(subtitle, selected, active)
     loadTemplate("set1", results.templateselect)
     applyTemplate(subtitle, selected, active)
     aegisub.set_undo_point(script_name)
-  else
+  elseif aegisub.cancel ~= nil then
     aegisub.cancel()
   end
   return storeConfig()
@@ -560,7 +576,7 @@ templateManager = function()
     if pressed then
       applyConfig(results.templateBox)
       return storeConfig()
-    else
+    elseif aegisub.cancel ~= nil then
       return aegisub.cancel()
     end
   end
