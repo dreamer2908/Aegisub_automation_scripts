@@ -28,6 +28,8 @@ Users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.c
 This script is written to save time when typesetting several similar signs. You can just create a template, time the signs, and then apply it to them; that's all. Using this to keep consistent between several scripts is fine, too.
 
 The configuration file is supposed to be stored in automation/autoload folder, the same as this script. All templates and settings are stored there.
+If you want it to be somewhere else, change <code>absolutePath = false</code> to <code>absolutePath = true</code>, AND replace <code>drm_template_based_typesetting.conf</code> with any *absolute* path you want. Note that on Windows system, you must use <code>\\</code> (two slash) instead of <code>\</code> (one slash); that is, use <code>D:\\random\\folder\\template.conf</code> instead of <code>D:\random\folder\template.conf</code>. If you're on Linux/Unix, a normal path like <code>/home/me/Desktop/fagging/template.conf</code> works just fine.
+In Aegisub 3.0+ and 2.1.9 WIN32 PORTABLE, path decoding should work well; if you're using something else, you MUST set an absolute path as guided above. This script won't work without a writable configuration file.
 
 To add/remove/change templates, you need to edit the configuration manually, as NO TEMPLATE MANAGER IS PROVIDED. This is probably enough to scare away many bad and lazy typesetters. I did make something called "Template manager", but unfortunately, it's just a handy dialog to edit the configuration. Aegisub dialog for automation scripts is too simple for any efficient manager anyway.
 
@@ -54,6 +56,7 @@ Open the so-called "Template manager" and add a (bunch of) new template(s). Sele
 Seriously, don't be lazy.
 
 As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.lua drm_template_based_typesetting.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.moon drm_template_based_typesetting.moon]) — the main version. 
+I normally avoid unnecessarily breaking compatibility with old version, but Aegisub 2.1.9 is just a pain. Moreover, there's no reason to typeset in 2.1.9 as 3.0 is much better. 
 
 == Switch between styles ==
 
@@ -65,4 +68,4 @@ If you want to ignore some difference between styles, that is, to skip copying s
 
 As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_switch_between_styles.lua drm_switch_between_styles.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_switch_between_styles.moon drm_switch_between_styles.moon]) — the main version. 
 
-Goodbye*
+== Goodbye* ==
