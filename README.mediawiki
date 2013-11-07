@@ -56,7 +56,7 @@ Similar for <code>margin_left</code>, <code>margin_right</code>, <code>margin_to
 
 <code>style_name</code> is the name of the style you want the line to use. If it's empty, the original style of the line is kept.
 
-<code>tags_to_add>/code> is whatever you want to append to the beginning of the text. It can be some tags, text, comment, etc.
+<code>tags_to_add</code> is whatever you want to append to the beginning of the text. It can be some tags, text, comment, etc.
 
 You can group templates by set. The active set is determined by <code>currentSet</code>. In 0.1.4 or later, you can have several active sets at the same time; just separate each set name with a comma.
 
@@ -66,7 +66,7 @@ Let's look at a few sample:
 
 <code>#set2,Increase layer by 10,+10,0,0,,+0,+0,+0,+0,</code>
 
-This template does what its name says. Layer +10 increases the layer of the line by 10. The rest is kept: time offset 0,0 keeps the original timing; empty style name keeps the style; margins +0 keep the margin (-0 also works).
+This template does what its name says. Layer +10 increases the layer of the line by 10. The rest is kept: time offset 0,0 keeps the original timing, empty style name keeps the style, and margins +0 keep the margins (-0 also works).
 
 <code>#set2,Increase margin,+0,0,0,,+20,+100,+100,+50,</code>
 
@@ -74,6 +74,7 @@ This keeps the timing, style, and layers, while increases the margins. I don't t
 
 <code>
 #set1,Nase Mitsuki,1,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur4\bord1.1\3c&HFFFFFF&}
+
 #set1,Nase Mitsuki,0,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur0.5\3c&HFFFFFF&}
 </code>
 
@@ -91,7 +92,7 @@ A sample configuration file is provided here: [https://raw.github.com/dreamer290
 
 === Usage ===
 
-Open the so-called "Template manager" and add a (bunch of) new template(s). Select some lines, click Automation/Apply a template, choose a template from the list, and click "OK" to apply. That's all.
+Open the so-called "Template manager" and add a (bunch of) new template(s). Select some lines, click Automation/Apply a template, choose one template from the list(s), and click "OK" to apply. That's all.
 
 Seriously, don't be lazy.
 
