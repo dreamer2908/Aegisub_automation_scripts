@@ -1,7 +1,7 @@
 
 == Introduction ==
 
-I wrote/am writing/will write some automation scripts for Aegisub, and I just put them here. They might be useful, useless, or even dangerous, depending on my mood and what crazy idea I have in mind. These scripts are not guaranteed not only to work and produce something useful, but also to not blow your Aegisub, kill your cat, or make your girlfriend dump you, etc. Use them at your own risk; you have been warned. Huehuehue.
+I wrote/am writing/will write some automation scripts for Aegisub, and I just put them here. They might be useful, useless, or even dangerous, depending on my mood and what crazy idea I have in mind. These scripts are not guaranteed not only to work and produce something useful, but also to not blow your Aegisub, kill your cat, or make your girlfriend dump you, etc. Use them at your own risk; you have been warned. Huehuehue~
 
 Oh right, most should have "drm_" as prefix just to reduce the level of messiness in your autoload folder.
 
@@ -15,9 +15,9 @@ As the time went by, a new subtitle render appeared: xy-vsfilter—Well, it's no
 
 Now we can finally do thing in the way it's supposed to be, right? Who cares about those leechers who's still using some ridiculously old piece of software from the Stone Age?
 
-Oh, don't bother to read the above paragraphs, btw. It's not like you need to know about the past
+Oh, don't bother to read the above paragraphs, btw. It's not like you need to know about the past.
 
-This script can be used to convert the color matrix of the subtitles so that subtitles made with matrix BT.601 can fit it a script made with matrix BT.709 and vice versa; you can also use it adapt the existing subtitles to the correct working environment.
+This script can be used to adjust colors specified in subtitles so that ones made with matrix BT.601 can fit it scripts made with matrix BT.709 and vice versa. You can also use it adapt the existing subtitles to the correct working environment. In other words, it converts the color matrix used in subtitles.
 
 Usage: Copy it to your autoload folder. The macro's name is "Color Matrix Converter". Select conversion mode ("BT.601 to BT.709" or "BT.709 to BT.601"); whether you want to convert selected lines, styles, or everything; and whether you want it to set the YCbCr Matrix field for you. Click OK; that's all. These selections are retained until Aegisub closes.
 
@@ -27,27 +27,67 @@ Users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.c
 
 This script is written to save time when typesetting several similar signs. You can just create a template, time the signs, and then apply it to them; that's all. Using this to keep consistent between several scripts is fine, too.
 
-The configuration file is supposed to be stored in automation/autoload folder, the same as this script. All templates and settings are stored there.
+The configuration file is supposed to be stored in automation/autoload folder; same for this script. All templates and settings are stored there.
+
 If you want it to be somewhere else, change <code>absolutePath = false</code> to <code>absolutePath = true</code>, AND replace <code>drm_template_based_typesetting.conf</code> with any *absolute* path you want. Note that on Windows system, you must use <code>\\</code> (two slash) instead of <code>\</code> (one slash); that is, use <code>D:\\random\\folder\\template.conf</code> instead of <code>D:\random\folder\template.conf</code>. If you're on Linux/Unix, a normal path like <code>/home/me/Desktop/fagging/template.conf</code> works just fine.
-In Aegisub 3.0+ and 2.1.9 WIN32 PORTABLE, path decoding should work well; if you're using something else, you MUST set an absolute path as guided above. This script won't work without a writable configuration file.
+In Aegisub 3.0+ and 2.1.9 WIN32 PORTABLE ([https://dl.dropboxusercontent.com/u/35211112/tools/Aegisub-2.1.9-mod-rev5-latest-xy.7z this one] to be precise), path decoding should work and get the correct path. If you're using something else, you MUST set an absolute path as guided above. This script won't work properly without a writable configuration file.
 
 To add/remove/change templates, you need to edit the configuration manually, as NO TEMPLATE MANAGER IS PROVIDED. This is probably enough to scare away many bad and lazy typesetters. I did make something called "Template manager", but unfortunately, it's just a handy dialog to edit the configuration. Aegisub dialog for automation scripts is too simple for any efficient manager anyway.
+
+As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.lua drm_template_based_typesetting.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.moon drm_template_based_typesetting.moon]) — the main version. There's no reason to typeset in 2.*, but compatibility doesn't hurt (much) so I just keep it.
 
 === Configuration file format ===
 
 In the configuration file, setting lines start with "$", and template lines start with "#". Everything else is ignored. Invalid setting/template lines are also ignored.
 
-Setting lines are in the following format: $variable=value. Only currentSet is used at the moment.
+Setting lines are in the following format: <code>$variable=value</code>. Only <code>currentSet</code> is used at the moment.
 
-Template lines are in the following format: #set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add
+Template lines are in the following format: <code>#set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add</code>
 
-set_name, template_name, and style_name must NOT contain any comma — ASS format also doesn't allow comma in style name.
+Each template line defines a layer of your typeset template — or call it whatever you want. If the template consists of several layers, put each layer in a separated line.
 
-If the template consists of several layers, put each layer in a separated template line. You can group templates by set. The active set is determined by currentSet. If style_name is empty, the original style of the line is reserved.
+<code>set_name</code>, <code>template_name</code>, and <code>style_name</code> are strings, and must NOT contain any comma — ASS format also doesn't allow comma in style name.
 
-A sample configuration file is provided here: [https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/samples/drm_template_based_typesetting.conf drm_template_based_typesetting.conf].
+<code>layer</code> is a number. Put a normal number there if you want to set the layer to a certain layer; put +num or -num if you want it to be num layers lower/higher than the layer set int the original line (offset mode). In sample "Increase layer by 10", it's +10 — The name is clear enough, right?
 
-There're also a few sample templates; feel free to delete them.
+Similar for <code>margin_left</code>, <code>margin_right</code>, <code>margin_top</code>, <code>margin_bottom</code>. Note that in offset mode, if margin_* is 0, the margin_* is taken from the (original) style. It's the correct behaviour.
+
+<code>start_time_offset</code>, and <code>end_time_offset</code> define the amount of centi-seconds you want to add/remove from the line. In most cases, you would use 0 and 0.
+
+<code>style_name</code> is the name of the style you want the line to use. If it's empty, the original style of the line is kept.
+
+<code>tags_to_add>/code> is whatever you want to append to the beginning of the text. It can be some tags, text, comment, etc.
+
+You can group templates by set. The active set is determined by <code>currentSet</code>. In 0.1.4 or later, you can have several active sets at the same time; just separate each set name with a comma.
+
+=== Sample templates ===
+
+Let's look at a few sample:
+
+<code>#set2,Increase layer by 10,+10,0,0,,+0,+0,+0,+0,</code>
+
+This template does what its name says. Layer +10 increases the layer of the line by 10. The rest is kept: time offset 0,0 keeps the original timing; empty style name keeps the style; margins +0 keep the margin (-0 also works).
+
+<code>#set2,Increase margin,+0,0,0,,+20,+100,+100,+50,</code>
+
+This keeps the timing, style, and layers, while increases the margins. I don't think anyone would do something like this, though.
+
+<code>
+#set1,Nase Mitsuki,1,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur4\bord1.1\3c&HFFFFFF&}
+#set1,Nase Mitsuki,0,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur0.5\3c&HFFFFFF&}
+</code>
+
+This template has two layers: 
+*Layer 1: Timing and margins are kept, layer is changed to 1, style is changed to "Signs", and a few tags are added to the beginning of the text.
+*Layer 2: You can guess.
+
+<code>#set2,{\an8},+0,0,0,,+0,+0,+0,+0,{\an8}{*bestest* typeset}</code>
+
+This adds {\an8} and a glorious comment to the line; everything else is unchanged.
+
+Yes, you can do a lot with this script.
+
+A sample configuration file is provided here: [https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/samples/drm_template_based_typesetting.conf drm_template_based_typesetting.conf]. There're two sets of templates, and both are set to be active.
 
 === Usage ===
 
@@ -55,8 +95,6 @@ Open the so-called "Template manager" and add a (bunch of) new template(s). Sele
 
 Seriously, don't be lazy.
 
-As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.lua drm_template_based_typesetting.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.moon drm_template_based_typesetting.moon]) — the main version. 
-I normally avoid unnecessarily breaking compatibility with old version, but Aegisub 2.1.9 is just a pain. Moreover, there's no reason to typeset in 2.1.9 as 3.0 is much better. 
 
 == Switch between styles ==
 
