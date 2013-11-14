@@ -42,7 +42,7 @@ As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://ra
 
 In the configuration file, setting lines start with "$", and template lines start with "#". Everything else is ignored. Invalid setting/template lines are also ignored.
 
-Setting lines are in the following format: <code>$variable=value</code>. Only <code>currentSet</code> is used at the moment.
+Setting lines are in the following format: <code>$variable=value</code>. Only <code>activeSet</code> is used at the moment.
 
 Template lines are in the following format: <code>#set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add</code>
 
