@@ -27,16 +27,23 @@ Users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.c
 
 This script is written to save time when typesetting several similar signs. You can just create a template, time the signs, and then apply it to them; that's all. Using this to keep consistent between several scripts or massively modifying lines is fine, too.
 
+=== Usage ===
+
+Open the "Template manager" and add a (bunch of) new template(s). Select some lines, click Automation/Apply a template, choose one template from the list(s), and click "OK" to apply. That's all.
+
+In older version, you must type out everytime you need to create a template, but now you can use "New template" dialog to add new templates. That saves some keystrokes and lets you be a bit more lazy. You can also create templates automatically from subtitles: Just make one line of what you will feed to the script, and some lines of what you want it to produce; press some buttons; and baang! You get a template! 
+
+For other operations like removing/changing/etc. templates, you should edit the configuration manually. I find this more convinient; deal with it if you don't feel the same.
+
+As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.lua drm_template_based_typesetting.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.moon drm_template_based_typesetting.moon]) — the main version. There's no reason to typeset in 2.*, but compatibility doesn't hurt (much) so I just keep it.
+
+=== Configuration file location ===
+
 The configuration file is supposed to be stored in automation/autoload folder; same for this script. All templates and settings are stored there.
 
 If you want it to be somewhere else, change <code>absolutePath = false</code> to <code>absolutePath = true</code>, AND replace <code>drm_template_based_typesetting.conf</code> with any *absolute* path you want. Note that on Windows system, you must use <code>\\</code> (two slash) instead of <code>\</code> (one slash); that is, use <code>D:\\random\\folder\\template.conf</code> instead of <code>D:\random\folder\template.conf</code>. If you're on Linux/Unix, a normal path like <code>/home/me/Desktop/fagging/template.conf</code> works just fine.
-In Aegisub 3.0+ and 2.1.9 WIN32 PORTABLE ([https://dl.dropboxusercontent.com/u/35211112/tools/Aegisub-2.1.9-mod-rev5-latest-xy.7z this one] to be precise), path decoding should work and get the correct path. If you're using something else, you MUST set an absolute path as guided above. This script won't work properly without a writable configuration file.
 
-To add/remove/change templates, you need to edit the configuration manually, as NO TEMPLATE MANAGER IS PROVIDED. This is probably enough to scare away many bad and lazy typesetters. I did make something called "Template manager", but unfortunately, it's just a handy dialog to edit the configuration. Aegisub dialog for automation scripts is too simple for any efficient manager anyway. 
-
-Updated: There will be a dialog to add new template so that you (I) can be a bit more lazy. You will be able to create templates automatically from subtitles: Just make one line of what you will feed to the script, and some lines of what you want it to produce; press some buttons; and baang! You get a template!
-
-As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.lua drm_template_based_typesetting.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.moon drm_template_based_typesetting.moon]) — the main version. There's no reason to typeset in 2.*, but compatibility doesn't hurt (much) so I just keep it.
+In Aegisub 3.0+ and 2.1.9 WIN32 PORTABLE ([https://dl.dropboxusercontent.com/u/35211112/tools/Aegisub-2.1.9-mod-rev5-latest-xy.7z this one] to be precise), path decoding should work and get the correct path. If you're using something else, you MUST set an absolute path as guided above. This script won't work properly without a configuration file with full read/write access.
 
 === Configuration file format ===
 
@@ -92,11 +99,9 @@ Yeah, you can do a lot with this script.
 
 A sample configuration file is provided here: [https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/samples/drm_template_based_typesetting.conf drm_template_based_typesetting.conf]. There're two sets of templates, and both are set to be active.
 
-=== Usage ===
+=== Important note ===
 
-Open the so-called "Template manager" and add a (bunch of) new template(s). Select some lines, click Automation/Apply a template, choose one template from the list(s), and click "OK" to apply. That's all.
-
-Seriously, don't be lazy.
+Don't be lazy, seriously!
 
 
 == Switch between styles ==
