@@ -33,9 +33,7 @@ Open the "Template manager" and add a (bunch of) new template(s). Select some li
 
 In older version, you must type out everytime you need to create a template, but now you can use "New template" dialog to add new templates. That saves some keystrokes and lets you be a bit more lazy. You can also create templates automatically from subtitles: Just make one line of what you will feed to the script, and some lines of what you want it to produce; press some buttons; and baang! You get a template! 
 
-Note: "New template" dialog only shows 5 lines of the template by default (chosen by me). Change <code>linesPerPageLimit = 5</code> to something else if you don't like my decision. Use "Next page" button to navigate between pages.
-
-For other operations like removing/changing/etc. templates, you should edit the configuration manually. I find this more convinient; deal with it if you don't feel the same.
+Note: "New template" dialog only shows 5 lines of the template by default (chosen by me). Change <code>linesPerPageLimit = 5</code> to something else if you don't like my decision. Use "Next page" button to navigate between pages. The pre-made editing dialog only lets you access some most common and useful options; edit the configuration manually if you want more advanced templates.
 
 As usual, users of Aegisub 2.* and 3.0.* should use the lua version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.lua drm_template_based_typesetting.lua]), and users of version 3.1 or later should use the moonscript version ([https://raw.github.com/dreamer2908/Aegisub_automation_scripts/master/drm_template_based_typesetting.moon drm_template_based_typesetting.moon]) — the main version. There's no reason to typeset in 2.*, but compatibility doesn't hurt (much) so I just keep it.
 
@@ -53,15 +51,15 @@ In the configuration file, setting lines start with "$", and template lines star
 
 Setting lines are in the following format: <code>$variable=value</code>. Only <code>activeSet</code> is used at the moment.
 
-Template lines are in the following format: <code>#set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add</code>
+Template lines are in the following format: <code>#set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_vertical,tags_to_add</code>
 
 Each template line defines a line of your typeset template — or call it whatever you want. If the template consists of several layers/lines, put each one in a separated line.
 
 <code>set_name</code>, <code>template_name</code>, and <code>style_name</code> are strings, and must NOT contain any comma — ASS format also doesn't allow comma in style name.
 
-<code>layer</code> is a number. Put a normal number there if you want to set the layer to a certain layer; put +num or -num if you want it to be num layers lower/higher than the layer set int the original line (offset mode). In sample "Increase layer by 10", it's +10 — The name is clear enough, right? From version 0.1.5, you can leave out <code>layer</code> to keep the original layer. For example, you can use <code>#set2,{\an8},,0,0,,,,,,{\an8}{*bestest* typeset}</code> instead of <code>#set2,{\an8},+0,0,0,,+0,+0,+0,+0,{\an8}{*bestest* typeset}</code> now
+<code>layer</code> is a number. Put a normal number there if you want to set the layer to a certain layer; put +num or -num if you want it to be num layers lower/higher than the layer set int the original line (offset mode). In sample "Increase layer by 10", it's +10 — The name is clear enough, right? From version 0.1.5, you can leave out <code>layer</code> to keep the original layer. For example, you can use <code>#set2,{\an8},,0,0,,,,,{\an8}{*bestest* typeset}</code> instead of <code>#set2,{\an8},+0,0,0,,+0,+0,+0,{\an8}{*bestest* typeset}</code> now
 
-Similar for <code>margin_left</code>, <code>margin_right</code>, <code>margin_top</code>, <code>margin_bottom</code>. Note that in offset mode, if margin_* is 0, the margin_* is taken from the (original) style. It's the correct behaviour.
+Similar for <code>margin_left</code>, <code>margin_right</code>, <code>margin_vertical</code>. Note that in relative mode, if margin_* is 0, the margin_* is taken from the (original) style. It's the correct behaviour.
 
 <code>start_time_offset</code>, and <code>end_time_offset</code> define the amount of centi-seconds you want to add/remove from the line. In most cases, you would use 0 and 0.
 
@@ -75,18 +73,18 @@ You can group templates by set. The active set is determined by <code>currentSet
 
 Let's look at a few sample:
 
-<code>#set2,Increase layer by 10,+10,0,0,,,,,,</code>
+<code>#set2,Increase layer by 10,+10,0,0,,,,,</code>
 
 This template does what its name says. Layer +10 increases the layer of the line by 10. The rest is kept: time offset 0,0 keeps the original timing, empty style name keeps the style, and margins "empty" keep the margins (-0 or +0 also works).
 
-<code>#set2,Increase margin,,0,0,,+20,+100,+100,+50,</code>
+<code>#set2,Increase margin,,0,0,,+20,+100,+100,</code>
 
 This keeps the timing, style, and layers, while increases the margins. I don't think anyone would do something like this, though.
 
 <code>
-#set1,Nase Mitsuki,1,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur4\bord1.1\3c&HFFFFFF&}
+#set1,Nase Mitsuki,1,0,0,Signs,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur4\bord1.1\3c&HFFFFFF&}
 
-#set1,Nase Mitsuki,0,0,0,Signs,0,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur0.5\3c&HFFFFFF&}
+#set1,Nase Mitsuki,0,0,0,Signs,0,0,0,{\pos(830,600)\fad(0,400)\alpha&HFF&\t(0,1200,2,\alpha&H00&)\c&HC840B1&\fscx101\fscy100\blur0.5\3c&HFFFFFF&}
 </code>
 
 This template has two layers: 
