@@ -6,7 +6,7 @@
 export script_name        = "Template-based typesetting tool"
 export script_description = "Create a template, time the signs, and apply it to them; that's all. It's useful when there're many similar signs, or you want to keep consistent between scripts."
 export script_author      = "dreamer2908"
-export script_version     = "0.2.0"
+export script_version     = "0.3.0"
 
 configFile = "drm_template_based_typesetting.conf"
 absolutePath = false
@@ -27,7 +27,7 @@ copyTable = (t) ->
 		r[i] = v
 	return r
 
--- This one will blow if the table contains circles like Table1.a -> Table1, 
+-- This one will blow if the table contains circles like Table1.a -> Table1,
 -- Table1.Table2.a -> Table1, or Table1.a -> Table2 and Table2.b -> Table1, etc.
 copyTableRecursive = (t) ->
 	r = {}
@@ -43,6 +43,12 @@ copyTableDeep = (t) ->
 	r = {}
 	return r
 
+getIndexListOfTable = (t) ->
+	list = {}
+	for i,v in pairs(t)
+		table.insert(list, i)
+	return list
+	
 greaterNum = (a, b) ->
 	if a > b
 		return a
@@ -62,31 +68,37 @@ validString = (s) ->
 	if type(s) == "string"
 		return s
 	return ""
-		
+
 validBoolean = (v) ->
 	if type(v) == "boolean"
 		return v
 	return false
-		
+
 stringStartsWith = (s, text) ->
 	if type(s) ~= "string" or type(text) ~= "string"
 		return false
 	return string.sub(s, 1, #text) == text
-	
+
 booleanToRelativeAbsolute = (value) ->
 	if value
 		return "Relative"
 	return "Absolute"
-	
--- checks if string s contains string text. It always considers text as normal text, never a patern. Make another function if you need patern
+
+-- checks if string s contains string text. stringContains always considers text as normal text, never a patern. Use stringContainsPatern instead if you need patern
 stringContains = (s, text) ->
 	if type(s) ~= "string" or type(text) ~= "string"
 		return false
 	if string.match(s, text) == text
 		return true
-	else 
+	return false
+		
+stringContainsPatern = (s, text) ->
+	if type(s) ~= "string" or type(text) ~= "string"
 		return false
-
+	if string.match(s, text) ~= nil
+		return true
+	return false
+	
 ----------------------------------------------------------------------------
 -------                     Template storage                         -------
 ----------------------------------------------------------------------------
@@ -94,59 +106,6 @@ stringContains = (s, text) ->
 -- {set1:{template1:{layersinfo},template2:{layersinfo}},set2:{template1:{layersinfo},template2:{layersinfo}}}
 storage = {
 	["set1"]:{
-		["Kanbara Akihito"]:{
-			lineCount:2,
-			layer:{1,0},
-			startTimeOffset:{0,0},
-			endTimeOffset:{0,0},
-			style:{"Signs","Signs"},
-			margin_l:{0,0},
-			margin_r:{0,0},
-			margin_t:{0,0},
-			margin_b:{0,0},
-			text:{"{\\pos(928,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H42C3E6&\\fscx100\\fscy100\\blur4\\bord1.1\\3c&HFFFFFF&}","{\\pos(928,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H42C3E6&\\fscx100\\fscy100\\blur0.6\\3c&HFFFFFF&}"},
-			layer_relative: {false,false},
-			margin_l_relative: {false,false},
-			margin_r_relative: {false,false},
-			margin_t_relative: {false,false},
-			margin_b_relative: {false,false}
-		},
-		["Nase Mitsuki"]:{
-			lineCount:2,
-			layer:{1,0},
-			startTimeOffset:{0,0},
-			endTimeOffset:{0,0},
-			style:{"Signs","Signs"},
-			margin_l:{0,0},
-			margin_r:{0,0},
-			margin_t:{0,0},
-			margin_b:{0,0},
-			text:{"{\\pos(830,600)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&HC840B1&\\fscx101\\fscy100\\blur4\\bord1.1\\3c&HFFFFFF&}","{\\pos(830,600)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&HC840B1&\\fscx101\\fscy100\\blur0.5\\3c&HFFFFFF&}"},
-			layer_relative: {false,false},
-			margin_l_relative: {false,false},
-			margin_r_relative: {false,false},
-			margin_t_relative: {false,false},
-			margin_b_relative: {false,false}
-		},
-		["Nase Hiro'omi"]:{
-			lineCount:2,
-			layer:{1,0},
-			startTimeOffset:{0,0},
-			endTimeOffset:{0,0},
-			style:{"Signs","Signs"},
-			margin_l:{0,0},
-			margin_r:{0,0},
-			margin_t:{0,0},
-			margin_b:{0,0},
-			text:{"{\\pos(407,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H31DC6E&\\fscx95\\fscy100\\blur4\\bord1.1\\3c&HFFFFFF&}","{\\pos(407,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H71B788&\\fscx95\\fscy100\\blur0.5\\3c&HFFFFFF&}"},
-			layer_relative: {false,false},
-			margin_l_relative: {false,false},
-			margin_r_relative: {false,false},
-			margin_t_relative: {false,false},
-			margin_b_relative: {false,false}
-		}
-	}
-	["set2"]:{
 		["Shindou Ai"]:{
 			lineCount:2,
 			layer:{1,0},
@@ -155,14 +114,12 @@ storage = {
 			style:{"Signs","Signs"},
 			margin_l:{0,0},
 			margin_r:{0,0},
-			margin_t:{0,0},
-			margin_b:{0,0},
+			margin_v:{0,0},
 			text:{"{\\pos(380,600)\\fad(0,300)\\alpha&HFF&\\t(0,600,2,\\alpha&H00&)\\c&HFAEEED&\\fscx107\\fscy103\\blur4\\bord1\\3c&H00000&}","{\\pos(380,600)\\fad(0,300)\\alpha&HFF&\\t(0,600,2,\\alpha&H00&)\\c&HFFF7F7&\\fscx107\\fscy103\\blur0.5\\3c&H00000&}"},
 			layer_relative: {false,false},
 			margin_l_relative: {false,false},
 			margin_r_relative: {false,false},
-			margin_t_relative: {false,false},
-			margin_b_relative: {false,false}
+			margin_v_relative: {false,false}
 		},
 		["Kuriyama Mirai"]:{
 			lineCount:2,
@@ -172,14 +129,12 @@ storage = {
 			style:{"Signs","Signs"},
 			margin_l:{0,0},
 			margin_r:{0,0},
-			margin_t:{0,0},
-			margin_b:{0,0},
+			margin_v:{0,0},
 			text:{"{\\pos(408,600)\\fad(0,400)\\alpha&HFF&\\t(0,1500,2,\\alpha&H00&)\\c&H9177E4&\\fscx103\\fscy103\\blur4\\bord1.1\\3c&HFFFFFF&}","{\\pos(408,600)\\fad(0,400)\\alpha&HFF&\\t(0,1500,2,\\alpha&H00&)\\c&H4B30BD&\\fscx103\\fscy103\\blur0.5}"},
 			layer_relative: {false,false},
 			margin_l_relative: {false,false},
 			margin_r_relative: {false,false},
-			margin_t_relative: {false,false},
-			margin_b_relative: {false,false}
+			margin_v_relative: {false,false}
 		},
 		["{\\an8}"]:{
 			lineCount:1,
@@ -189,14 +144,12 @@ storage = {
 			style:{""},
 			margin_l:{0},
 			margin_r:{0},
-			margin_t:{0},
-			margin_b:{0},
+			margin_v:{0},
 			text:{"{\\an8}{*bestest* typeset}"},
 			layer_relative: {true},
 			margin_l_relative: {true},
 			margin_r_relative: {true},
-			margin_t_relative: {true},
-			margin_b_relative: {true}
+			margin_v_relative: {true}
 		},
 		["Increase layer by 10"]:{
 			lineCount:1,
@@ -206,31 +159,12 @@ storage = {
 			style:{""},
 			margin_l:{0},
 			margin_r:{0},
-			margin_t:{0},
-			margin_b:{0},
+			margin_v:{0},
 			text:{""},
 			layer_relative: {true},
 			margin_l_relative: {true},
 			margin_r_relative: {true},
-			margin_t_relative: {true},
-			margin_b_relative: {true}
-		},
-		["emptyTemplate"]:{
-			lineCount: 0,
-			layer: {},
-			startTimeOffset: {},
-			endTimeOffset: {},
-			style: {},
-			margin_l: {},
-			margin_r: {},
-			margin_t: {},
-			margin_b: {},
-			text: {},
-			layer_relative: {},
-			margin_l_relative: {},
-			margin_r_relative: {},
-			margin_t_relative: {},
-			margin_b_relative: {}
+			margin_v_relative: {true}
 		}
 	}
 }
@@ -243,16 +177,14 @@ emptyTemplate =
 	style: {},
 	margin_l: {},
 	margin_r: {},
-	margin_t: {},
-	margin_b: {},
+	margin_v: {},
 	text: {},
 	layer_relative: {},
 	margin_l_relative: {},
 	margin_r_relative: {},
-	margin_t_relative: {},
-	margin_b_relative: {}
+	margin_v_relative: {}
 
-activeSet = {"set1","set2"}
+activeSet = {"set1"}
 currentTemplate = emptyTemplate
 
 ----------------------------------------------------------------------------
@@ -263,30 +195,28 @@ currentTemplate = emptyTemplate
 loadEmptyTemplate = () ->
 	currentTemplate = copyTable(emptyTemplate)
 
--- loads the specified template into currentTemplate
+-- loads the specified template into currentTemplate. If it doesn't exit, load the empty template
 loadTemplate = (set, index) ->
-	-- always check if it exists
-	if storage[set] ~= nil
-		if storage[set][index] ~= nil
-			currentTemplate = copyTable(storage[set][index])
-		else
-			currentTemplate = copyTable(emptyTemplate)
-	else loadEmptyTemplate
+	if storage[set] ~= nil and storage[set][index] ~= nil
+		currentTemplate = copyTable(storage[set][index])
+	else
+		currentTemplate = copyTable(emptyTemplate)
 
 -- saves the current template to somewhere
 saveTemplate = (set, index) ->
 	if storage[set] == nil
 		storage[set] = {}
 	storage[set][index] = copyTable(currentTemplate)
+	
+-- null a template
+deleteTemplate = (set, index) ->
+	if storage[set] ~= nil and storage[set][index] ~= nil
+		storage[set][index] = nil
 
 -- append all lines in currentTemplate to somewhere
 appendTemplate = (set, index) ->
-    text, style = "", ""
-	layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-	layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = false, false, false, false, false
-    
     for i = 1, currentTemplate.lineCount
-        -- read line info
+		-- copy each line info
         text = currentTemplate.text[i]
         style = currentTemplate.style[i]
         layer = currentTemplate.layer[i]
@@ -294,107 +224,84 @@ appendTemplate = (set, index) ->
         endTimeOffset = currentTemplate.endTimeOffset[i]
         margin_l = currentTemplate.margin_l[i]
         margin_r = currentTemplate.margin_r[i]
-        margin_t = currentTemplate.margin_t[i]
-        margin_b = currentTemplate.margin_b[i]
+        margin_v = currentTemplate.margin_v[i]
         layer_relative = currentTemplate.layer_relative[i]
         margin_l_relative = currentTemplate.margin_l_relative[i]
         margin_r_relative = currentTemplate.margin_r_relative[i]
-        margin_t_relative = currentTemplate.margin_t_relative[i]
-        margin_b_relative = currentTemplate.margin_b_relative[i]
-        -- store it
-        storeNewLineInfo(set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
-    
+        margin_v_relative = currentTemplate.margin_v_relative[i]
+        -- and store it
+        storeNewLineInfo(set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
+
 -- Indexes of storage's members are set names
 getSetList = () ->
-	list = {}
-	num = 0
 	if storage ~= nil
-		for i,v in pairs(storage)
-			num += 1
-			list[num] = i
-	return list
+		return getIndexListOfTable(storage)
+	return {}
 
 -- Indexes of set table's members are template names
 getTemplateList = (set) ->
-	list = {}
-	num = 0
-	if storage[set] ~= nil
-		for i,v in pairs(storage[set])
-			num += 1
-			list[num] = i
-	return list
+	if storage ~= nil and storage[set] ~= nil
+		return getIndexListOfTable(storage[set])
+	return {}
 
 getLayerList = (set, template) ->
-	layerList = {}
-	-- always check if the item exists
-	if storage ~= nil
-		if storage[set] ~= nil
-			if storage[set][template] ~= nil
-				if storage[set][template].lineCount ~= nil
-					for i = 1, storage[set][template].lineCount
-						layerList[i] = i
+	if storage ~= nil and storage[set] ~= nil and storage[set][template] ~= nil
+		if type(storage[set][template].lineCount) == "number"
+			for i = 1, storage[set][template].lineCount
+				layerList[i] = i
 	return layerList
 
 -- verifies each set in activeSet and keeps valid ones. If none is valid, grab a random one from current database
 checkSanity = () ->
-	setCurrent = {}
+	validList = {}
 	setCount = 0
 	for i,v in ipairs(activeSet)
 		if storage[v] ~= nil
 			setCount += 1
-			setCurrent[setCount] = v
-	activeSet = setCurrent
+			validList[setCount] = v
+	activeSet = validList
 	if setCount < 1
-		setCurrent = getSetList()
-		if #setCurrent > 0
+		validList = getSetList()
+		if #validList > 0
 			math.randomseed(os.time())
-			activeSet[1] = setCurrent[math.random(#setCurrent)]
+			activeSet[1] = validList[math.random(#validList)]
+	
+-- remove the last line from template
+removeLastLineFromTemplate = (cur) ->
+	if cur.lineCount > 0
+		cur.lineCount -= 1
+		for i,v in pairs(cur)
+			if type(v) == "table"
+				table.remove(v)
 
--- increases lineCount and add more line info to cur template
-storeNewLineInfoSub = (cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative) ->
-	currentLayer = cur.lineCount + 1
-	cur.lineCount = currentLayer
+-- increases lineCount and append line info into the end of cur template
+appendLineInfo = (cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative) ->
+	currentLine = cur.lineCount + 1
+	cur.lineCount = currentLine
+	-- use replaceLineInfo to write line info to reduce code redundancy
+	replaceLineInfo(cur, currentLine, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
+
+-- doesn't increase lineCount. Line info will be stored in lineIndex (a fixed position)
+replaceLineInfo = (cur, lineIndex, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative) ->
+	currentLine = lineIndex
 	--
-	cur.layer[currentLayer] = layer
-	cur.startTimeOffset[currentLayer] = startTimeOffset
-	cur.endTimeOffset[currentLayer] = endTimeOffset
-	cur.style[currentLayer] = style
+	cur.layer[currentLine] = layer
+	cur.startTimeOffset[currentLine] = startTimeOffset
+	cur.endTimeOffset[currentLine] = endTimeOffset
+	cur.style[currentLine] = style
 	--
-	cur.margin_l[currentLayer] = margin_l
-	cur.margin_r[currentLayer] = margin_r
-	cur.margin_t[currentLayer] = margin_t
-	cur.margin_b[currentLayer] = margin_b
-	cur.text[currentLayer] = text
+	cur.margin_l[currentLine] = margin_l
+	cur.margin_r[currentLine] = margin_r
+	cur.margin_v[currentLine] = margin_v
+	cur.text[currentLine] = text
 	--
-	cur.layer_relative[currentLayer] = layer_relative
-	cur.margin_l_relative[currentLayer] = margin_l_relative
-	cur.margin_r_relative[currentLayer] = margin_r_relative
-	cur.margin_t_relative[currentLayer] = margin_t_relative
-	cur.margin_b_relative[currentLayer] = margin_b_relative
-	
--- replace 
-replaceLineInfo = (cur, lineIndex, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative) ->
-	currentLayer = lineIndex
-	--
-	cur.layer[currentLayer] = layer
-	cur.startTimeOffset[currentLayer] = startTimeOffset
-	cur.endTimeOffset[currentLayer] = endTimeOffset
-	cur.style[currentLayer] = style
-	--
-	cur.margin_l[currentLayer] = margin_l
-	cur.margin_r[currentLayer] = margin_r
-	cur.margin_t[currentLayer] = margin_t
-	cur.margin_b[currentLayer] = margin_b
-	cur.text[currentLayer] = text
-	--
-	cur.layer_relative[currentLayer] = layer_relative
-	cur.margin_l_relative[currentLayer] = margin_l_relative
-	cur.margin_r_relative[currentLayer] = margin_r_relative
-	cur.margin_t_relative[currentLayer] = margin_t_relative
-	cur.margin_b_relative[currentLayer] = margin_b_relative
-	
+	cur.layer_relative[currentLine] = layer_relative
+	cur.margin_l_relative[currentLine] = margin_l_relative
+	cur.margin_r_relative[currentLine] = margin_r_relative
+	cur.margin_v_relative[currentLine] = margin_v_relative
+
 -- adds a new layer to existing template, or creates a new template with this layer if it doesn't exist
-storeNewLineInfo = (set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative) ->
+storeNewLineInfo = (set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative) ->
 	-- create a new empty set and empty template if it doesn't exist
 	if storage[set] == nil
 		storage[set] = {}
@@ -422,24 +329,22 @@ storeNewLineInfo = (set, index, layer, startTimeOffset, endTimeOffset, style, ma
 			style: {},
 			margin_l: {},
 			margin_r: {},
-			margin_t: {},
-			margin_b: {},
+			margin_v: {},
 			text: {},
 			layer_relative: {},
 			margin_l_relative: {},
 			margin_r_relative: {},
-			margin_t_relative: {},
-			margin_b_relative: {}
+			margin_v_relative: {}
 	-- increases lineCount and add more line info
 	cur = storage[set][index]
-	storeNewLineInfoSub(cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+	appendLineInfo(cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
 
 ----------------------------------------------------------------------------
 -------                      Configuration stuff                     -------
 ----------------------------------------------------------------------------
 
 -- get layer, margin values and their mode. It's relative if it starts with + or -
-parseLayerMarginAndTheirMode = (line, lastPos, pos) ->
+parseLayerMarginAndMode = (line, lastPos, pos) ->
 	relative = true
 	value = 0
 	if pos > lastPos + 1 -- only actually parse it if the field is non-empty
@@ -459,18 +364,33 @@ parseTimingOffset = (line, lastPos, pos) ->
 	if pos > lastPos + 1 -- only actually parse it if the field is non-empty
 		value = validNum(tonumber(string.sub(line, lastPos + 1, pos - 1), 10))
 	return value
-
+	
+verifyLayerMargin = (line, lastPos, pos) ->
+	if pos == lastPos + 1
+		return true -- empty field
+	if string.sub(line, lastPos + 1, lastPos + 1) == "+" or string.sub(line, lastPos + 1, lastPos + 1) == "-"
+		if pos == lastPos + 2 
+			return true -- it only contains the sign
+		if type(tonumber(string.sub(line, lastPos + 2, pos - 1), 10)) == "number"
+			return true -- a valid signed number
+		return false -- not a number
+	if type(tonumber(string.sub(line, lastPos + 1, pos - 1), 10)) == "number"
+		return true -- a valid unsigned number
+	return false -- not a number
+	
 -- parses one configuration line.
 -- variable lines start with $, and template lines start with #.
 -- everything else should be ignored
 parseCFLine = (line) ->
 	if string.sub(line,1,1) == "#" and #line > 1
-		-- parses template. Ex: #set1,template1,0,0,0,Signs,0,0,0,0,{\fad(0,300)}
+		-- parses template. 
+		-- new format: #set2,{\an8},+0,0,0,,+0,+0,+0,{\an8}{*bestest* typesetting}
+		-- old format: #set2,{\an8},+0,0,0,,+0,+0,+0,+0,{\an8}{*bestest* typesetting}
 		line = string.sub(line,2,-1) -- trim "#"
 
-		-- a valid template line must have at least 10 commas
+		-- a valid template line must have at least 9 (new format) or 10 commas (old format)
 		commaCount = select(2, string.gsub(line, ",", ","))
-		if commaCount >= 10
+		if commaCount >= 9
 			-- get the first element, which is set name, and the second one, which is template name
 			pos = string.find(line, ",")
 			setName = string.sub(line, 1, pos - 1)
@@ -481,12 +401,12 @@ parseCFLine = (line) ->
 			if #setName > 0 and #tempName > 0 -- names mustn't be empty
 				-- parses the rest of the line. There're enough commas so this shouldn't fail
 				text, style = "", ""
-				layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-				layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = false, false, false, false, false
+				layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_v = 0, 0, 0, 0, 0, 0, 0
+				layer_relative, margin_l_relative, margin_r_relative, margin_v_relative = false, false, false, false, false
 				-- layer
 				lastPos = pos
 				pos = string.find(line, ",", pos + 1)
-				layer_relative, layer = parseLayerMarginAndTheirMode(line, lastPos, pos)
+				layer_relative, layer = parseLayerMarginAndMode(line, lastPos, pos)
 				-- timing offsets
 				lastPos = pos
 				pos = string.find(line, ",", pos + 1)
@@ -501,19 +421,28 @@ parseCFLine = (line) ->
 				-- margin_l
 				lastPos = pos
 				pos = string.find(line, ",", pos + 1)
-				margin_l_relative, margin_l = parseLayerMarginAndTheirMode(line, lastPos, pos)
+				margin_l_relative, margin_l = parseLayerMarginAndMode(line, lastPos, pos)
 				-- margin_r
 				lastPos = pos
 				pos = string.find(line, ",", pos + 1)
-				margin_r_relative, margin_r = parseLayerMarginAndTheirMode(line, lastPos, pos)
-				-- margin_t
+				margin_r_relative, margin_r = parseLayerMarginAndMode(line, lastPos, pos)
+				-- margin_v
 				lastPos = pos
 				pos = string.find(line, ",", pos + 1)
-				margin_t_relative, margin_t = parseLayerMarginAndTheirMode(line, lastPos, pos)
-				-- margin_b
-				lastPos = pos
-				pos = string.find(line, ",", pos + 1)
-				margin_b_relative, margin_b = parseLayerMarginAndTheirMode(line, lastPos, pos)
+				margin_v_relative, margin_v = parseLayerMarginAndMode(line, lastPos, pos)
+				
+				-- deal with margin_b in old format
+				if commaCount >= 10
+					-- backup pos info
+					pos_bk = pos
+					lastPos_bk = lastPos
+					-- check if it's the old format. Revert to backup values if not
+					lastPos = pos
+					pos = string.find(line, ",", pos + 1)
+					if not verifyLayerMargin(line, lastPos, pos)
+						pos = pos_bk
+						lastPos = lastPos_bk
+					
 				-- everything else is text/tags
 				text = string.sub(line, pos + 1)
 
@@ -523,11 +452,10 @@ parseCFLine = (line) ->
 				endTimeOffset = validNum(endTimeOffset)
 				margin_l = validNum(margin_l)
 				margin_r = validNum(margin_r)
-				margin_t = validNum(margin_t)
-				margin_b = validNum(margin_b)
+				margin_v = validNum(margin_v)
 
 				-- stores info just got
-				storeNewLineInfo(setName, tempName, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+				storeNewLineInfo(setName, tempName, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
 
 	elseif string.sub(line,1,1) == "$"
 		-- parses variable(s)
@@ -578,12 +506,12 @@ generateCFText = () ->
 			for k = 1,cur.lineCount
 				-- and for each layer in that template
 				-- writes a line in the following format
-				-- #set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_top,margin_bottom,tags_to_add
+				-- #set_name,template_name,layer,start_time_offset,end_time_offset,style_name,margin_left,margin_right,margin_vertical,tags_to_add
 				-- set_name, template_name, and style_name mustn't contain any comma
 				-- For layer and margins, add "+" if it's relative; negative values are automatically assumed relative.
 				-- Though vsfilter supports negative layer, no one should use it; Aegisub also doesn't allow you to input negative value
-				-- Same for margin_left, margin_right, margin_top, and margin_bottom
-				-- Sometimes "+-0" appears; it's just funny and doesn't harm anything, so I just let it alone =))))))))
+				-- Same for margin_left, margin_right, and margin_vertical
+				-- Sometimes "+-0" appears; it's just funny and doesn't harm anything, so I let it alone =))))))))
 
 				setName =  string.gsub(i, ",", "") -- removes all comma from these names
 				tempName =  string.gsub(j, ",", "")
@@ -599,12 +527,9 @@ generateCFText = () ->
 				if cur.margin_r_relative[k] and cur.margin_r[k] >= 0
 					result ..= "+"
 				result ..= cur.margin_r[k]..","
-				if cur.margin_t_relative[k] and cur.margin_t[k] >= 0
+				if cur.margin_v_relative[k] and cur.margin_v[k] >= 0
 					result ..= "+"
-				result ..= cur.margin_t[k]..","
-				if cur.margin_b_relative[k] and cur.margin_b[k] >= 0
-					result ..= "+"
-				result ..= cur.margin_b[k]..","..cur.text[k].."\n" --" debug info: real count "..#cur.text.."\n"
+				result ..= cur.margin_v[k]..","..cur.text[k].."\n" --" debug info: real count "..#cur.text.."\n"
 			result ..= "\n"
 	return result
 
@@ -754,14 +679,14 @@ applyTemplate = (subtitle, selected, active) ->
 		line = subtitle[li]
 		-- Assuming the template is valid
 		for k = 1,currentTemplate.lineCount
-			thisLayer = subTemplate(line,k)
+			thisLayer = applyTemplate_Line(line,k)
 			subtitle.insert(li+k-1, thisLayer)
 		-- Delete the original line unless the template is empty or retainOriginalLines
 		if currentTemplate.lineCount > 0 and not retainOriginalLines
 			subtitle.delete(li + currentTemplate.lineCount)
 
 -- Creates a new layer (line) from layer i-th info in current template
-subTemplate = (line, i) ->
+applyTemplate_Line = (line, i) ->
 	result = copyTable(line) -- it will bork if u don't copy
 	result.comment = false
 	style = styleList[result.style]
@@ -795,20 +720,13 @@ subTemplate = (line, i) ->
 			result.margin_r = style.margin_r + currentTemplate.margin_r[i]
 	else
 		result.margin_r = currentTemplate.margin_r[i]
-	if currentTemplate.margin_t_relative[i]
-		if result.margin_t ~= 0 or currentTemplate.margin_t[i] == 0
-			result.margin_t += currentTemplate.margin_t[i]
+	if currentTemplate.margin_v_relative[i]
+		if result.margin_t ~= 0 or currentTemplate.margin_v[i] == 0
+			result.margin_t += currentTemplate.margin_v[i]
 		else
-			result.margin_t = style.margin_t + currentTemplate.margin_t[i]
+			result.margin_t = style.margin_t + currentTemplate.margin_v[i]
 	else
-		result.margin_t = currentTemplate.margin_t[i]
-	if currentTemplate.margin_b_relative[i]
-		if result.margin_b ~= 0 or currentTemplate.margin_b[i] == 0
-			result.margin_b += currentTemplate.margin_b[i]
-		else
-			result.margin_b = style.margin_b + currentTemplate.margin_b[i]
-	else
-		result.margin_b = currentTemplate.margin_b[i]
+		result.margin_t = currentTemplate.margin_v[i]
 
 	-- add text in template to the beginning of the line's text
 	result.text = currentTemplate.text[i]..result.text
@@ -818,12 +736,11 @@ subTemplate = (line, i) ->
 	result.margin_l = greaterNum(result.margin_l, 0)
 	result.margin_r = greaterNum(result.margin_r, 0)
 	result.margin_t = greaterNum(result.margin_t, 0)
-	result.margin_b = greaterNum(result.margin_b, 0)
 	return result
 
 -- Main macro to apply template
 templateApplyingFunction = (subtitle, selected, active) ->
-	-- (re-)load the configuration. It shouldn't be slow unless there're *a lot* of lines. Haven't tested how many is "a lot.
+	-- (re-)load the configuration. It shouldn't be slow unless there're *a lot* of lines. Haven't tested how many is "a lot".
 	loadConfig!
 	checkSanity!
 
@@ -870,39 +787,11 @@ currentPage = 1
 newTemplate_Set = ""
 newTemplate_Template = ""
 newTemplate_Replace = true
+newTemplate_FullLayout = false
 
 managerDialog = {
 	{class:"label",x:0,y:0,width:1,height:1,label:"Current configuration:"},
 	{class:"textbox",x:0,y:1,width:70,height:10,name:"templateBox",text:""}
-}
-
-newTemplateDialog = {
-	{class:"label",x:0,y:0,width:1,height:1,label:"Set name: "},
-	{class:"edit",x:1,y:0,width:2,height:1,name:"setName",text:""},
-	{class:"label",x:3,y:0,width:1,height:1,label:"Template: "},
-	{class:"edit",x:4,y:0,width:3,height:1,name:"templateName",text:""}
-}
-
-newTemplateDialogTemplate = {
-	{class:"label",x:0,y:1,width:1,height:1,label:"Timing offset: "},
-	{class:"intedit",x:1,y:1,width:1,height:1,name:"startTimeOffset",value:0},
-	{class:"intedit",x:2,y:1,width:1,height:1,name:"endTimeOffset",value:0},
-	{class:"label",x:0,y:2,width:1,height:1,label:"Layer: "},
-	{class:"dropdown",x:1,y:2,width:1,height:1,name:"layerRelative",items:{"Absolute", "Relative"},value:"Absolute"},
-	{class:"intedit",x:2,y:2,width:1,height:1,name:"layer",value:0},
-	{class:"label",x:3,y:1,width:1,height:1,label:"Style: "},
-	{class:"dropdown",x:4,y:1,width:1,height:1,name:"style",items:{},value:""},
-	{class:"label",x:3,y:2,width:1,height:1,label:"Margins: "},
-	{class:"dropdown",x:4,y:2,width:1,height:1,name:"marginRelative",items:{"Absolute", "Relative"},value:"Absolute"},
-	{class:"label",x:5,y:1,width:1,height:1,label:"Left: "},
-	{class:"label",x:5,y:2,width:1,height:1,label:"Right: "},
-	{class:"intedit",x:6,y:1,width:1,height:1,name:"margin_l",value:0},
-	{class:"intedit",x:6,y:2,width:1,height:1,name:"margin_r",value:0},
-	{class:"label",x:7,y:1,width:1,height:1,label:"Top: "},
-	{class:"label",x:7,y:2,width:1,height:1,label:"Bottom: "},
-	{class:"intedit",x:8,y:1,width:1,height:1,name:"margin_t",value:0},
-	{class:"intedit",x:8,y:2,width:1,height:1,name:"margin_b",value:0},
-	{class:"textbox",x:9,y:1,width:30,height:2,name:"text",text:""}
 }
 
 selectSetDialog = {
@@ -915,38 +804,74 @@ selectTemplateDialog = {
 	{class:"dropdown",x:1,y:0,width:2,height:1,name:"select",items:{""},value:""}
 }
 
--- lets user select a line in a template in a set and loads it into new template dialog
-newTemplate_Load = (subtitle, selected, active) ->
+-- Yup, it just calls newTemplate_Load
+editTemplate = (subtitle, selected, active) ->
+	return newTemplate_Load(subtitle, selected, active, true)
+
+-- lets user select a template in a set, and then loads it into new template dialog
+-- loadNames = true if you want it to copy set name and template name to newTemplate_Set and newTemplate_Template
+newTemplate_Load = (subtitle, selected, active, loadNames) ->
 	setSelect = ""
 	templateSelect = ""
-	layerSelect = {}
 
 	-- Select a set. Skip if there's only one set or no set at all
 	selectSetDialog[2]["items"] = getSetList()
 	if #selectSetDialog[2]["items"] > 1
 		selectSetDialog[2]["value"] = selectSetDialog[2]["items"][1]
-		pressed, results = aegisub.dialog.display(selectSetDialog, {"OK", "Cancel"}, {cancel:"Cancel"})
+		
+		pressed, results = aegisub.dialog.display(selectSetDialog, {"OK", "Cancel"}, {ok:"OK", cancel:"Cancel"})
 		if pressed == "OK"
 			setSelect = results["select"]
 	elseif #selectSetDialog[2]["items"] == 1
 		setSelect = selectSetDialog[2]["items"][1]
 
 	if setSelect ~= ""
-		-- Select a template. Skip if there's only one template or no template at all
+		-- Select a template. Do not skip even if there's only one template or no template at all
 		selectTemplateDialog[2]["items"] = getTemplateList(setSelect)
 		if #selectTemplateDialog[2]["items"] > 1
 			selectTemplateDialog[2]["value"] = selectTemplateDialog[2]["items"][1]
-			pressed, results = aegisub.dialog.display(selectTemplateDialog, {"OK", "Cancel"}, {cancel:"Cancel"})
-			if pressed == "OK"
-				templateSelect = results["select"]
-		elseif #selectTemplateDialog[2]["items"] == 1
-			templateSelect = selectTemplateDialog[2]["items"][1]
-
-		if templateSelect ~= ""
-			-- load it
-			loadTemplate(setSelect, templateSelect)
+			
+		pressed, results = aegisub.dialog.display(selectTemplateDialog, {"OK", "Cancel"}, {ok:"OK", cancel:"Cancel"})
+		if pressed == "OK"
+			templateSelect = results["select"]
+			if templateSelect ~= ""
+				loadTemplate(setSelect, templateSelect)
+			else
+				loadEmptyTemplate!
+			if loadNames
+				newTemplate_Set = setSelect
+				newTemplate_Template = templateSelect
 	return newTemplate(subtitle, selected, active)
 
+-- lets user select a template in a set, and then remove it
+removeTemplateDialog = () ->
+	setSelect = ""
+	templateSelect = ""
+
+	-- Select a set. Skip if there's only one set or no set at all
+	selectSetDialog[2]["items"] = getSetList()
+	if #selectSetDialog[2]["items"] > 1
+		selectSetDialog[2]["value"] = selectSetDialog[2]["items"][1]
+		
+		pressed, results = aegisub.dialog.display(selectSetDialog, {"OK", "Cancel"}, {ok:"OK", cancel:"Cancel"})
+		if pressed == "OK"
+			setSelect = results["select"]
+	elseif #selectSetDialog[2]["items"] == 1
+		setSelect = selectSetDialog[2]["items"][1]
+
+	if setSelect ~= ""
+		-- Select a template. Do not skip even if there's only one template or no template at all
+		selectTemplateDialog[2]["items"] = getTemplateList(setSelect)
+		if #selectTemplateDialog[2]["items"] > 1
+			selectTemplateDialog[2]["value"] = selectTemplateDialog[2]["items"][1]
+			
+		pressed, results = aegisub.dialog.display(selectTemplateDialog, {"OK", "Cancel"}, {ok:"OK", cancel:"Cancel"})
+		if pressed == "OK"
+			templateSelect = results["select"]
+			deleteTemplate(setSelect, templateSelect)
+			checkSanity!
+			storeConfig!
+	
 -- value1 is the original, value2 is the target
 -- if the target layer is equal to or higher than minOffset, or when the two values are equal, assume it's relative; otherwise, assume it's absolute
 parseTemplateFromLine_Layer = (value1, value2) ->
@@ -958,20 +883,17 @@ parseTemplateFromLine_Layer = (value1, value2) ->
 		value = value2 - value1
 	return relative, value
 
--- similar, but different minOffset
+-- assume all absolute for now
 parseTemplateFromLine_Margin = (value1, value2) ->
 	value = value2
 	relative = false
-	minOffset = 35
-	if value2 >= minOffset or value1 == value2
-		relative = true
-		value = value2 - value1
 	return relative, value
 
 parseTemplateFromLine = (original, target, tempStorage) ->
+	-- 
 	text, style = "", ""
-	layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-	layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = false, false, false, false, false
+	layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_v = 0, 0, 0, 0, 0, 0
+	layer_relative, margin_l_relative, margin_r_relative, margin_v_relative = false, false, false, false
 
 	-- timing
 	startTimeOffset = target.start_time - original.start_time
@@ -988,11 +910,10 @@ parseTemplateFromLine = (original, target, tempStorage) ->
 	-- margins
 	margin_l_relative, margin_l = parseTemplateFromLine_Margin(original.margin_l, target.margin_l)
 	margin_r_relative, margin_r = parseTemplateFromLine_Margin(original.margin_r, target.margin_r)
-	margin_t_relative, margin_t = parseTemplateFromLine_Margin(original.margin_t, target.margin_t)
-	margin_b_relative, margin_b = parseTemplateFromLine_Margin(original.margin_b, target.margin_b)
+	margin_v_relative, margin_v = parseTemplateFromLine_Margin(original.margin_t, target.margin_t)
 
 	-- store info
-	storeNewLineInfoSub(tempStorage, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+	appendLineInfo(tempStorage, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
 
 newTemplate_LoadFromLines = (subtitle, selected, active) ->
 	-- parse selected lines
@@ -1014,29 +935,26 @@ newTemplate_Store = (results) ->
 	newTemplate_Set = validString(results["setName"])
 	newTemplate_Template = validString(results["templateName"])
     newTemplate_Replace = validBoolean(results["replace"])
-	
+
 	-- checks if each line defined in currentTemplate is mapped into the dialog; if it's mapped, copy it back to currentTemplate
 	-- all named controls' names in this format: <basicName><lineID>. A simple test if startTimeOffset<ID> exists is enough
 	for i = 1, currentTemplate.lineCount
 		if results["startTimeOffset"..i] ~= nil
+			--
 			layer = results["layer"..i]
 			text = results["text"..i]
 			style = results["style"..i]
+			--
 			startTimeOffset = results["startTimeOffset"..i]
 			endTimeOffset = results["endTimeOffset"..i]
+			--
 			margin_l = results["margin_l"..i]
 			margin_r = results["margin_r"..i]
-			margin_t = results["margin_t"..i]
-			margin_b = results["margin_b"..i]
-			margin_t = results["margin_t"..i]
-			margin_b = results["margin_b"..i]
+			margin_v = results["margin_v"..i]
 			--
 			layer_relative = stringContains(results["layer_relative"..i], "elative")
-			margin_l_relative = stringContains(results["margin_relative"..i], "elative")
-			margin_r_relative = stringContains(results["margin_relative"..i], "elative")
-			margin_t_relative = stringContains(results["margin_relative"..i], "elative")
-			margin_b_relative = stringContains(results["margin_relative"..i], "elative")
-			
+			-- margin_l_relative, margin_r_relative, margin_v_relative = false, false, false
+
 			-- validate values
 			text = validString(text)
 			style = validString(style)
@@ -1045,25 +963,23 @@ newTemplate_Store = (results) ->
 			endTimeOffset = validNum(endTimeOffset)
 			margin_l = validNum(margin_l)
 			margin_r = validNum(margin_r)
-			margin_t = validNum(margin_t)
-			margin_b = validNum(margin_b)
+			margin_v = validNum(margin_v)
 			margin_l_relative = validBoolean(margin_l_relative)
 			margin_r_relative = validBoolean(margin_r_relative)
-			margin_t_relative = validBoolean(margin_t_relative)
-			margin_b_relative = validBoolean(margin_b_relative)
-			
+			margin_v_relative = validBoolean(margin_v_relative)
+
 			-- store info just got
-			replaceLineInfo(currentTemplate, i, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
-			
+			replaceLineInfo(currentTemplate, i, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
+
 -- Save the new template to disk
 newTemplate_Save = (results) ->
 	newTemplate_Store(results)
-	itsSane = true			
+	itsSane = true
 	-- check for sanity
 	if #results["setName"] < 1 or #results["templateName"] < 1
 		itsSane = false
 	if currentTemplate.lineCount < 1
-		itsSane = false		
+		itsSane = false
 	-- and save the final result
 	if itsSane
 		if newTemplate_Replace
@@ -1072,80 +988,86 @@ newTemplate_Save = (results) ->
             appendTemplate(results["setName"], results["templateName"])
 		checkSanity!
 		storeConfig!
-	
--- Add a new blank line
-newTemplate_NewLine = () ->
-	text, style = "", ""
-	layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-	layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = true, true, true, true, true
-	storeNewLineInfoSub(currentTemplate, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
-	
--- Layout the dialog
-newTemplate_Layout = (pageNum, subtitle) ->	
 
+-- Add a new blank line
+newTemplate_MoreLine = () ->
+	text, style = "", ""
+	layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_v = 0, 0, 0, 0, 0, 0
+	layer_relative, margin_l_relative, margin_r_relative, margin_v_relative = true, false, false, false
+	appendLineInfo(currentTemplate, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
+	
+-- remove the last line
+newTemplate_LessLine = () ->
+	removeLastLineFromTemplate(currentTemplate)
+
+-- Layout the dialog
+newTemplate_Layout = (pageNum, subtitle) ->
 	-- Don't bother to reuse styleL as running getStyleList 100000 times only takes 25s. That's unexpectedly fast
 	styleL = getStyleList(subtitle)
-    table.insert(styleL,"")
-	
+    table.insert(styleL, "") -- There should be a blank entry
+
 	-- basic dialog layout
-	layout = {	
-		{class:"label",x:0,y:0,width:1,height:1,label:"Set name: "},
+	layout = {
+		{class:"label",x:0,y:0,width:1,height:1,label:"     Set:"},
 		{class:"edit",x:1,y:0,width:2,height:1,name:"setName",text:validString(newTemplate_Set)},
-		{class:"label",x:3,y:0,width:1,height:1,label:"Template: "},
+		{class:"label",x:3,y:0,width:1,height:1,label:"Template:"},
 		{class:"edit",x:4,y:0,width:3,height:1,name:"templateName",text:validString(newTemplate_Template)}
-        {class:"checkbox",x:8,y:0,width:5,height:1,name:"replace",label:"Replace existing template",value:newTemplate_Replace}
+        {class:"checkbox",x:7,y:0,width:5,height:1,name:"replace",label:"Replace existing template",value:newTemplate_Replace}
 	}
-	
+
 	-- There's a limit of how many lines is displayed at the same time.
 	-- Template with too many lines will be splitted into pages. The limit is defined in linesPerPageLimit
 	lineStart = linesPerPageLimit * (pageNum - 1) + 1
 	lineEnd = smallerNum(pageNum * linesPerPageLimit, currentTemplate.lineCount)
-	
+
 	-- Insert chosen template(s) into the dialog. i = order in the dialog, l = ID in currentTemplate
 	i = 1
 	for l = lineStart, lineEnd
-		baseIndex = (i - 1) * 19 + 6
+		baseIndex = (i - 1) * 11 + 6
 		baseID = l
 		baseY = i * 2 - 1
 		i += 1
-		layout[baseIndex+1] = {class:"label",x:0,y:baseY,width:1,height:1,label:"Timing offset: "}
+		
+		layout[baseIndex+1] = {class:"label",x:0,y:baseY,width:1,height:1,label:"Timing:"}
 		layout[baseIndex+2] = {class:"intedit",x:1,y:baseY,width:1,height:1,name:"startTimeOffset"..baseID,value:currentTemplate.startTimeOffset[baseID]}
 		layout[baseIndex+3] = {class:"intedit",x:2,y:baseY,width:1,height:1,name:"endTimeOffset"..baseID,value:currentTemplate.endTimeOffset[baseID]}
-		layout[baseIndex+4] = {class:"label",x:0,y:baseY+1,width:1,height:1,label:"Layer: "}
+		layout[baseIndex+4] = {class:"label",x:0,y:baseY+1,width:1,height:1,label:" Layer:"}
 		layout[baseIndex+5] = {class:"dropdown",x:1,y:baseY+1,width:1,height:1,name:"layer_relative"..baseID,items:{"Absolute", "Relative"},value:booleanToRelativeAbsolute(currentTemplate.layer_relative[baseID])}
 		layout[baseIndex+6] = {class:"intedit",x:2,y:baseY+1,width:1,height:1,name:"layer"..baseID,value:currentTemplate.layer[baseID]}
-		layout[baseIndex+7] = {class:"label",x:3,y:baseY,width:1,height:1,label:"Style: "}
-		layout[baseIndex+8] = {class:"dropdown",x:4,y:baseY,width:1,height:1,name:"style"..baseID,items:{},value:currentTemplate.style[baseID]}
-		layout[baseIndex+9] = {class:"label",x:3,y:baseY+1,width:1,height:1,label:"Margins: "}
-		layout[baseIndex+10] = {class:"dropdown",x:4,y:baseY+1,width:1,height:1,name:"margin_relative"..baseID,items:{"Absolute", "Relative"},value:booleanToRelativeAbsolute(currentTemplate.margin_b_relative[baseID])}
-		layout[baseIndex+11] = {class:"label",x:5,y:baseY,width:1,height:1,label:"Left: "}
-		layout[baseIndex+12] = {class:"label",x:5,y:baseY+1,width:1,height:1,label:"Right: "}
-		layout[baseIndex+13] = {class:"intedit",x:6,y:baseY,width:1,height:1,name:"margin_l"..baseID,value:currentTemplate.margin_l[baseID]}
-		layout[baseIndex+14] = {class:"intedit",x:6,y:baseY+1,width:1,height:1,name:"margin_r"..baseID,value:currentTemplate.margin_r[baseID]}
-		layout[baseIndex+15] = {class:"label",x:7,y:baseY,width:1,height:1,label:"Top: "}
-		layout[baseIndex+16] = {class:"label",x:7,y:baseY+1,width:1,height:1,label:"Bottom: "}
-		layout[baseIndex+17] = {class:"intedit",x:8,y:baseY,width:1,height:1,name:"margin_t"..baseID,value:currentTemplate.margin_t[baseID]}
-		layout[baseIndex+18] = {class:"intedit",x:8,y:baseY+1,width:1,height:1,name:"margin_b"..baseID,value:currentTemplate.margin_b[baseID]}
-		layout[baseIndex+19] = {class:"textbox",x:9,y:baseY,width:25,height:2,name:"text"..baseID,text:currentTemplate.text[baseID]}
-		
+		layout[baseIndex+7] = {class:"label",x:3,y:baseY,width:1,height:1,label:"       Style:"}
+		layout[baseIndex+8] = {class:"dropdown",x:4,y:baseY,width:3,height:1,name:"style"..baseID,items:{},value:currentTemplate.style[baseID]}
+		layout[baseIndex+9] = {class:"label",x:3,y:baseY+1,width:1,height:1,label:"  MarginV: "}
+		layout[baseIndex+10] = {class:"intedit",x:4,y:baseY+1,width:3,height:1,name:"margin_v"..baseID,value:currentTemplate.margin_v[baseID]}
+		layout[baseIndex+11] = {class:"textbox",x:7,y:baseY,width:35,height:2,name:"text"..baseID,text:currentTemplate.text[baseID]}
+	
 		-- Insert missing style into styleL
 		if not stringContains(table.concat(styleL),layout[baseIndex+8]["value"])
 			table.insert(styleL, layout[baseIndex+8]["value"])
 		layout[baseIndex+8]["items"] = styleL
-			
 	return layout
 
--- New template will use currentTemplate to store stuff. 
 newTemplate = (subtitle, selected, active) ->
-	-- determine what we should display
+	-- The new template is stored in currentTemplate
+	-- It shouldn't be empty
 	if currentTemplate.lineCount < 1
-		newTemplate_NewLine!
+		newTemplate_MoreLine!
+	-- determine which page we should display
 	pageCount = math.ceil(currentTemplate.lineCount / linesPerPageLimit)
 	if currentPage > pageCount
 		currentPage = pageCount
-	buttons = {"Save", "Load", "Load selected lines", "New line", "Main", "Exit"}
+		
+	-- generate buttons list
+	buttons = {"Save", "Load", "Load selected lines", "+lines", "-lines"}
 	if pageCount > 1
-		buttons = {"Save", "Load", "Load selected lines", "New line", "Next page", "Main", "Exit"}
+		table.insert(buttons, "Next page")
+	-- full layout is not implemented atm
+	-- if not newTemplate_FullLayout
+		-- table.insert(buttons, "Switch to full layout")
+	-- else 
+		-- table.insert(buttons, "Switch to compact layout")
+	table.insert(buttons, "Main")
+	table.insert(buttons, "Exit")
+	
 	pressed, results = aegisub.dialog.display(newTemplate_Layout(currentPage, subtitle), buttons, {ok:"Save", cancel:"Exit"})
 	if pressed == "Save"
 		newTemplate_Save(results)
@@ -1161,9 +1083,21 @@ newTemplate = (subtitle, selected, active) ->
 		else
 			currentPage += 1
 		return newTemplate(subtitle, selected, active)
-	elseif pressed == "New line"
+	elseif pressed == "+lines"
 		newTemplate_Store(results)
-		newTemplate_NewLine!
+		newTemplate_MoreLine!
+		return newTemplate(subtitle, selected, active)
+	elseif pressed == "-lines"
+		newTemplate_Store(results)
+		newTemplate_LessLine!
+		return newTemplate(subtitle, selected, active)
+	elseif pressed == "Switch to full layout"
+		newTemplate_Store(results)
+		newTemplate_FullLayout = true
+		return newTemplate(subtitle, selected, active)
+	elseif pressed == "Switch to compact layout"
+		newTemplate_Store(results)
+		newTemplate_FullLayout = false
 		return newTemplate(subtitle, selected, active)
 	elseif pressed == "Main"
 		return templateManager(subtitle, selected, active)
@@ -1173,7 +1107,7 @@ templateManager = (subtitle, selected, active) ->
 	loadConfig!
 	checkSanity!
 	managerDialog[2]["text"] = generateCFText()
-	pressed, results = aegisub.dialog.display(managerDialog, {"Save", "New template", "Exit"}, {cancel:"Exit"})--"Hue", 
+	pressed, results = aegisub.dialog.display(managerDialog, {"Save", "New template", "Edit template", "Remove template", "Exit"}, {cancel:"Exit"})--"Hue",
 	if pressed == "Save" -- forgot an equal sign. fixes /facepalms
 		applyConfig(results.templateBox)
 		checkSanity!
@@ -1181,7 +1115,12 @@ templateManager = (subtitle, selected, active) ->
 	elseif pressed == "New template"
 		loadEmptyTemplate!
 		return newTemplate(subtitle, selected, active)
+	elseif pressed == "Edit template"
+		return editTemplate(subtitle, selected, active)
+	elseif pressed == "Remove template"
+		return removeTemplateDialog(subtitle, selected, active)
 	elseif pressed == "Hue"
+		-- performance test
 		for i = 1, 100000
 			bafsdfsdfg  = getStyleList(subtitle)
 

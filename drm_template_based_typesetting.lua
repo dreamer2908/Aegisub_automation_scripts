@@ -6,10 +6,10 @@
 script_name = "Template-based typesetting tool"
 script_description = "Create a template, time the signs, and apply it to them; that's all. It's useful when there're many similar signs, or you want to keep consistent between scripts."
 script_author = "dreamer2908"
-script_version = "0.2.0"
+script_version = "0.3.0"
 local configFile = "drm_template_based_typesetting.conf"
 local absolutePath = false
-local copyTable, copyTableRecursive, copyTableDeep, greaterNum, smallerNum, validNum, validString, validBoolean, stringStartsWith, booleanToRelativeAbsolute, stringContains, storage, emptyTemplate, activeSet, currentTemplate, loadEmptyTemplate, loadTemplate, saveTemplate, appendTemplate, getSetList, getTemplateList, getLayerList, checkSanity, storeNewLineInfoSub, replaceLineInfo, storeNewLineInfo, parseLayerMarginAndTheirMode, parseTimingOffset, parseCFLine, generateCFText, checkPathAccessibility, getConfigPath, getFileSize, loadConfig, storeConfig, applyConfig, retainOriginalLines, styleList, getStyleList, updateStyleData, applyTemplate, subTemplate, templateApplyingFunction, linesPerPageLimit, currentPage, newTemplate_Set, newTemplate_Template, newTemplate_Replace, managerDialog, newTemplateDialog, newTemplateDialogTemplate, selectSetDialog, selectTemplateDialog, newTemplate_Load, parseTemplateFromLine_Layer, parseTemplateFromLine_Margin, parseTemplateFromLine, newTemplate_LoadFromLines, newTemplate_Store, newTemplate_Save, newTemplate_NewLine, newTemplate_Layout, newTemplate, templateManager
+local copyTable, copyTableRecursive, copyTableDeep, getIndexListOfTable, greaterNum, smallerNum, validNum, validString, validBoolean, stringStartsWith, booleanToRelativeAbsolute, stringContains, stringContainsPatern, storage, emptyTemplate, activeSet, currentTemplate, loadEmptyTemplate, loadTemplate, saveTemplate, deleteTemplate, appendTemplate, getSetList, getTemplateList, getLayerList, checkSanity, removeLastLineFromTemplate, appendLineInfo, replaceLineInfo, storeNewLineInfo, parseLayerMarginAndMode, parseTimingOffset, verifyLayerMargin, parseCFLine, generateCFText, checkPathAccessibility, getConfigPath, getFileSize, loadConfig, storeConfig, applyConfig, retainOriginalLines, styleList, getStyleList, updateStyleData, applyTemplate, applyTemplate_Line, templateApplyingFunction, linesPerPageLimit, currentPage, newTemplate_Set, newTemplate_Template, newTemplate_Replace, newTemplate_FullLayout, managerDialog, selectSetDialog, selectTemplateDialog, editTemplate, newTemplate_Load, removeTemplateDialog, parseTemplateFromLine_Layer, parseTemplateFromLine_Margin, parseTemplateFromLine, newTemplate_LoadFromLines, newTemplate_Store, newTemplate_Save, newTemplate_MoreLine, newTemplate_LessLine, newTemplate_Layout, newTemplate, templateManager
 copyTable = function(t)
   local r = { }
   for i, v in pairs(t) do
@@ -31,6 +31,13 @@ end
 copyTableDeep = function(t)
   local r = { }
   return r
+end
+getIndexListOfTable = function(t)
+  local list = { }
+  for i, v in pairs(t) do
+    table.insert(list, i)
+  end
+  return list
 end
 greaterNum = function(a, b)
   if a > b then
@@ -80,191 +87,20 @@ stringContains = function(s, text)
   end
   if string.match(s, text) == text then
     return true
-  else
+  end
+  return false
+end
+stringContainsPatern = function(s, text)
+  if type(s) ~= "string" or type(text) ~= "string" then
     return false
   end
+  if string.match(s, text) ~= nil then
+    return true
+  end
+  return false
 end
 storage = {
   ["set1"] = {
-    ["Kanbara Akihito"] = {
-      lineCount = 2,
-      layer = {
-        1,
-        0
-      },
-      startTimeOffset = {
-        0,
-        0
-      },
-      endTimeOffset = {
-        0,
-        0
-      },
-      style = {
-        "Signs",
-        "Signs"
-      },
-      margin_l = {
-        0,
-        0
-      },
-      margin_r = {
-        0,
-        0
-      },
-      margin_t = {
-        0,
-        0
-      },
-      margin_b = {
-        0,
-        0
-      },
-      text = {
-        "{\\pos(928,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H42C3E6&\\fscx100\\fscy100\\blur4\\bord1.1\\3c&HFFFFFF&}",
-        "{\\pos(928,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H42C3E6&\\fscx100\\fscy100\\blur0.6\\3c&HFFFFFF&}"
-      },
-      layer_relative = {
-        false,
-        false
-      },
-      margin_l_relative = {
-        false,
-        false
-      },
-      margin_r_relative = {
-        false,
-        false
-      },
-      margin_t_relative = {
-        false,
-        false
-      },
-      margin_b_relative = {
-        false,
-        false
-      }
-    },
-    ["Nase Mitsuki"] = {
-      lineCount = 2,
-      layer = {
-        1,
-        0
-      },
-      startTimeOffset = {
-        0,
-        0
-      },
-      endTimeOffset = {
-        0,
-        0
-      },
-      style = {
-        "Signs",
-        "Signs"
-      },
-      margin_l = {
-        0,
-        0
-      },
-      margin_r = {
-        0,
-        0
-      },
-      margin_t = {
-        0,
-        0
-      },
-      margin_b = {
-        0,
-        0
-      },
-      text = {
-        "{\\pos(830,600)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&HC840B1&\\fscx101\\fscy100\\blur4\\bord1.1\\3c&HFFFFFF&}",
-        "{\\pos(830,600)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&HC840B1&\\fscx101\\fscy100\\blur0.5\\3c&HFFFFFF&}"
-      },
-      layer_relative = {
-        false,
-        false
-      },
-      margin_l_relative = {
-        false,
-        false
-      },
-      margin_r_relative = {
-        false,
-        false
-      },
-      margin_t_relative = {
-        false,
-        false
-      },
-      margin_b_relative = {
-        false,
-        false
-      }
-    },
-    ["Nase Hiro'omi"] = {
-      lineCount = 2,
-      layer = {
-        1,
-        0
-      },
-      startTimeOffset = {
-        0,
-        0
-      },
-      endTimeOffset = {
-        0,
-        0
-      },
-      style = {
-        "Signs",
-        "Signs"
-      },
-      margin_l = {
-        0,
-        0
-      },
-      margin_r = {
-        0,
-        0
-      },
-      margin_t = {
-        0,
-        0
-      },
-      margin_b = {
-        0,
-        0
-      },
-      text = {
-        "{\\pos(407,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H31DC6E&\\fscx95\\fscy100\\blur4\\bord1.1\\3c&HFFFFFF&}",
-        "{\\pos(407,172)\\fad(0,400)\\alpha&HFF&\\t(0,1200,2,\\alpha&H00&)\\c&H71B788&\\fscx95\\fscy100\\blur0.5\\3c&HFFFFFF&}"
-      },
-      layer_relative = {
-        false,
-        false
-      },
-      margin_l_relative = {
-        false,
-        false
-      },
-      margin_r_relative = {
-        false,
-        false
-      },
-      margin_t_relative = {
-        false,
-        false
-      },
-      margin_b_relative = {
-        false,
-        false
-      }
-    }
-  },
-  ["set2"] = {
     ["Shindou Ai"] = {
       lineCount = 2,
       layer = {
@@ -291,11 +127,7 @@ storage = {
         0,
         0
       },
-      margin_t = {
-        0,
-        0
-      },
-      margin_b = {
+      margin_v = {
         0,
         0
       },
@@ -315,11 +147,7 @@ storage = {
         false,
         false
       },
-      margin_t_relative = {
-        false,
-        false
-      },
-      margin_b_relative = {
+      margin_v_relative = {
         false,
         false
       }
@@ -350,11 +178,7 @@ storage = {
         0,
         0
       },
-      margin_t = {
-        0,
-        0
-      },
-      margin_b = {
+      margin_v = {
         0,
         0
       },
@@ -374,11 +198,7 @@ storage = {
         false,
         false
       },
-      margin_t_relative = {
-        false,
-        false
-      },
-      margin_b_relative = {
+      margin_v_relative = {
         false,
         false
       }
@@ -403,10 +223,7 @@ storage = {
       margin_r = {
         0
       },
-      margin_t = {
-        0
-      },
-      margin_b = {
+      margin_v = {
         0
       },
       text = {
@@ -421,10 +238,7 @@ storage = {
       margin_r_relative = {
         true
       },
-      margin_t_relative = {
-        true
-      },
-      margin_b_relative = {
+      margin_v_relative = {
         true
       }
     },
@@ -448,10 +262,7 @@ storage = {
       margin_r = {
         0
       },
-      margin_t = {
-        0
-      },
-      margin_b = {
+      margin_v = {
         0
       },
       text = {
@@ -466,29 +277,9 @@ storage = {
       margin_r_relative = {
         true
       },
-      margin_t_relative = {
-        true
-      },
-      margin_b_relative = {
+      margin_v_relative = {
         true
       }
-    },
-    ["emptyTemplate"] = {
-      lineCount = 0,
-      layer = { },
-      startTimeOffset = { },
-      endTimeOffset = { },
-      style = { },
-      margin_l = { },
-      margin_r = { },
-      margin_t = { },
-      margin_b = { },
-      text = { },
-      layer_relative = { },
-      margin_l_relative = { },
-      margin_r_relative = { },
-      margin_t_relative = { },
-      margin_b_relative = { }
     }
   }
 }
@@ -500,32 +291,25 @@ emptyTemplate = {
   style = { },
   margin_l = { },
   margin_r = { },
-  margin_t = { },
-  margin_b = { },
+  margin_v = { },
   text = { },
   layer_relative = { },
   margin_l_relative = { },
   margin_r_relative = { },
-  margin_t_relative = { },
-  margin_b_relative = { }
+  margin_v_relative = { }
 }
 activeSet = {
-  "set1",
-  "set2"
+  "set1"
 }
 currentTemplate = emptyTemplate
 loadEmptyTemplate = function()
   currentTemplate = copyTable(emptyTemplate)
 end
 loadTemplate = function(set, index)
-  if storage[set] ~= nil then
-    if storage[set][index] ~= nil then
-      currentTemplate = copyTable(storage[set][index])
-    else
-      currentTemplate = copyTable(emptyTemplate)
-    end
+  if storage[set] ~= nil and storage[set][index] ~= nil then
+    currentTemplate = copyTable(storage[set][index])
   else
-    return loadEmptyTemplate
+    currentTemplate = copyTable(emptyTemplate)
   end
 end
 saveTemplate = function(set, index)
@@ -534,119 +318,99 @@ saveTemplate = function(set, index)
   end
   storage[set][index] = copyTable(currentTemplate)
 end
+deleteTemplate = function(set, index)
+  if storage[set] ~= nil and storage[set][index] ~= nil then
+    storage[set][index] = nil
+  end
+end
 appendTemplate = function(set, index)
-  local text, style = "", ""
-  local layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-  local layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = false, false, false, false, false
   for i = 1, currentTemplate.lineCount do
-    text = currentTemplate.text[i]
-    style = currentTemplate.style[i]
-    layer = currentTemplate.layer[i]
-    startTimeOffset = currentTemplate.startTimeOffset[i]
-    endTimeOffset = currentTemplate.endTimeOffset[i]
-    margin_l = currentTemplate.margin_l[i]
-    margin_r = currentTemplate.margin_r[i]
-    margin_t = currentTemplate.margin_t[i]
-    margin_b = currentTemplate.margin_b[i]
-    layer_relative = currentTemplate.layer_relative[i]
-    margin_l_relative = currentTemplate.margin_l_relative[i]
-    margin_r_relative = currentTemplate.margin_r_relative[i]
-    margin_t_relative = currentTemplate.margin_t_relative[i]
-    margin_b_relative = currentTemplate.margin_b_relative[i]
-    storeNewLineInfo(set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+    local text = currentTemplate.text[i]
+    local style = currentTemplate.style[i]
+    local layer = currentTemplate.layer[i]
+    local startTimeOffset = currentTemplate.startTimeOffset[i]
+    local endTimeOffset = currentTemplate.endTimeOffset[i]
+    local margin_l = currentTemplate.margin_l[i]
+    local margin_r = currentTemplate.margin_r[i]
+    local margin_v = currentTemplate.margin_v[i]
+    local layer_relative = currentTemplate.layer_relative[i]
+    local margin_l_relative = currentTemplate.margin_l_relative[i]
+    local margin_r_relative = currentTemplate.margin_r_relative[i]
+    local margin_v_relative = currentTemplate.margin_v_relative[i]
+    storeNewLineInfo(set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
   end
 end
 getSetList = function()
-  local list = { }
-  local num = 0
   if storage ~= nil then
-    for i, v in pairs(storage) do
-      num = num + 1
-      list[num] = i
-    end
+    return getIndexListOfTable(storage)
   end
-  return list
+  return { }
 end
 getTemplateList = function(set)
-  local list = { }
-  local num = 0
-  if storage[set] ~= nil then
-    for i, v in pairs(storage[set]) do
-      num = num + 1
-      list[num] = i
-    end
+  if storage ~= nil and storage[set] ~= nil then
+    return getIndexListOfTable(storage[set])
   end
-  return list
+  return { }
 end
 getLayerList = function(set, template)
-  local layerList = { }
-  if storage ~= nil then
-    if storage[set] ~= nil then
-      if storage[set][template] ~= nil then
-        if storage[set][template].lineCount ~= nil then
-          for i = 1, storage[set][template].lineCount do
-            layerList[i] = i
-          end
-        end
+  if storage ~= nil and storage[set] ~= nil and storage[set][template] ~= nil then
+    if type(storage[set][template].lineCount) == "number" then
+      for i = 1, storage[set][template].lineCount do
+        layerList[i] = i
       end
     end
   end
   return layerList
 end
 checkSanity = function()
-  local setCurrent = { }
+  local validList = { }
   local setCount = 0
   for i, v in ipairs(activeSet) do
     if storage[v] ~= nil then
       setCount = setCount + 1
-      setCurrent[setCount] = v
+      validList[setCount] = v
     end
   end
-  activeSet = setCurrent
+  activeSet = validList
   if setCount < 1 then
-    setCurrent = getSetList()
-    if #setCurrent > 0 then
+    validList = getSetList()
+    if #validList > 0 then
       math.randomseed(os.time())
-      activeSet[1] = setCurrent[math.random(#setCurrent)]
+      activeSet[1] = validList[math.random(#validList)]
     end
   end
 end
-storeNewLineInfoSub = function(cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
-  local currentLayer = cur.lineCount + 1
-  cur.lineCount = currentLayer
-  cur.layer[currentLayer] = layer
-  cur.startTimeOffset[currentLayer] = startTimeOffset
-  cur.endTimeOffset[currentLayer] = endTimeOffset
-  cur.style[currentLayer] = style
-  cur.margin_l[currentLayer] = margin_l
-  cur.margin_r[currentLayer] = margin_r
-  cur.margin_t[currentLayer] = margin_t
-  cur.margin_b[currentLayer] = margin_b
-  cur.text[currentLayer] = text
-  cur.layer_relative[currentLayer] = layer_relative
-  cur.margin_l_relative[currentLayer] = margin_l_relative
-  cur.margin_r_relative[currentLayer] = margin_r_relative
-  cur.margin_t_relative[currentLayer] = margin_t_relative
-  cur.margin_b_relative[currentLayer] = margin_b_relative
+removeLastLineFromTemplate = function(cur)
+  if cur.lineCount > 0 then
+    cur.lineCount = cur.lineCount - 1
+    for i, v in pairs(cur) do
+      if type(v) == "table" then
+        table.remove(v)
+      end
+    end
+  end
 end
-replaceLineInfo = function(cur, lineIndex, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
-  local currentLayer = lineIndex
-  cur.layer[currentLayer] = layer
-  cur.startTimeOffset[currentLayer] = startTimeOffset
-  cur.endTimeOffset[currentLayer] = endTimeOffset
-  cur.style[currentLayer] = style
-  cur.margin_l[currentLayer] = margin_l
-  cur.margin_r[currentLayer] = margin_r
-  cur.margin_t[currentLayer] = margin_t
-  cur.margin_b[currentLayer] = margin_b
-  cur.text[currentLayer] = text
-  cur.layer_relative[currentLayer] = layer_relative
-  cur.margin_l_relative[currentLayer] = margin_l_relative
-  cur.margin_r_relative[currentLayer] = margin_r_relative
-  cur.margin_t_relative[currentLayer] = margin_t_relative
-  cur.margin_b_relative[currentLayer] = margin_b_relative
+appendLineInfo = function(cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
+  local currentLine = cur.lineCount + 1
+  cur.lineCount = currentLine
+  return replaceLineInfo(cur, currentLine, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
 end
-storeNewLineInfo = function(set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+replaceLineInfo = function(cur, lineIndex, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
+  local currentLine = lineIndex
+  cur.layer[currentLine] = layer
+  cur.startTimeOffset[currentLine] = startTimeOffset
+  cur.endTimeOffset[currentLine] = endTimeOffset
+  cur.style[currentLine] = style
+  cur.margin_l[currentLine] = margin_l
+  cur.margin_r[currentLine] = margin_r
+  cur.margin_v[currentLine] = margin_v
+  cur.text[currentLine] = text
+  cur.layer_relative[currentLine] = layer_relative
+  cur.margin_l_relative[currentLine] = margin_l_relative
+  cur.margin_r_relative[currentLine] = margin_r_relative
+  cur.margin_v_relative[currentLine] = margin_v_relative
+end
+storeNewLineInfo = function(set, index, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
   if storage[set] == nil then
     storage[set] = { }
   end
@@ -659,20 +423,18 @@ storeNewLineInfo = function(set, index, layer, startTimeOffset, endTimeOffset, s
       style = { },
       margin_l = { },
       margin_r = { },
-      margin_t = { },
-      margin_b = { },
+      margin_v = { },
       text = { },
       layer_relative = { },
       margin_l_relative = { },
       margin_r_relative = { },
-      margin_t_relative = { },
-      margin_b_relative = { }
+      margin_v_relative = { }
     }
   end
   local cur = storage[set][index]
-  return storeNewLineInfoSub(cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+  return appendLineInfo(cur, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
 end
-parseLayerMarginAndTheirMode = function(line, lastPos, pos)
+parseLayerMarginAndMode = function(line, lastPos, pos)
   local relative = true
   local value = 0
   if pos > lastPos + 1 then
@@ -696,11 +458,29 @@ parseTimingOffset = function(line, lastPos, pos)
   end
   return value
 end
+verifyLayerMargin = function(line, lastPos, pos)
+  if pos == lastPos + 1 then
+    return true
+  end
+  if string.sub(line, lastPos + 1, lastPos + 1) == "+" or string.sub(line, lastPos + 1, lastPos + 1) == "-" then
+    if pos == lastPos + 2 then
+      return true
+    end
+    if type(tonumber(string.sub(line, lastPos + 2, pos - 1), 10)) == "number" then
+      return true
+    end
+    return false
+  end
+  if type(tonumber(string.sub(line, lastPos + 1, pos - 1), 10)) == "number" then
+    return true
+  end
+  return false
+end
 parseCFLine = function(line)
   if string.sub(line, 1, 1) == "#" and #line > 1 then
     line = string.sub(line, 2, -1)
     local commaCount = select(2, string.gsub(line, ",", ","))
-    if commaCount >= 10 then
+    if commaCount >= 9 then
       local pos = string.find(line, ",")
       local setName = string.sub(line, 1, pos - 1)
       local lastPos = pos
@@ -708,11 +488,11 @@ parseCFLine = function(line)
       local tempName = string.sub(line, lastPos + 1, pos - 1)
       if #setName > 0 and #tempName > 0 then
         local text, style = "", ""
-        local layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-        local layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = false, false, false, false, false
+        local layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_v = 0, 0, 0, 0, 0, 0, 0
+        local layer_relative, margin_l_relative, margin_r_relative, margin_v_relative = false, false, false, false, false
         lastPos = pos
         pos = string.find(line, ",", pos + 1)
-        layer_relative, layer = parseLayerMarginAndTheirMode(line, lastPos, pos)
+        layer_relative, layer = parseLayerMarginAndMode(line, lastPos, pos)
         lastPos = pos
         pos = string.find(line, ",", pos + 1)
         startTimeOffset = parseTimingOffset(line, lastPos, pos)
@@ -724,25 +504,31 @@ parseCFLine = function(line)
         style = string.sub(line, lastPos + 1, pos - 1)
         lastPos = pos
         pos = string.find(line, ",", pos + 1)
-        margin_l_relative, margin_l = parseLayerMarginAndTheirMode(line, lastPos, pos)
+        margin_l_relative, margin_l = parseLayerMarginAndMode(line, lastPos, pos)
         lastPos = pos
         pos = string.find(line, ",", pos + 1)
-        margin_r_relative, margin_r = parseLayerMarginAndTheirMode(line, lastPos, pos)
+        margin_r_relative, margin_r = parseLayerMarginAndMode(line, lastPos, pos)
         lastPos = pos
         pos = string.find(line, ",", pos + 1)
-        margin_t_relative, margin_t = parseLayerMarginAndTheirMode(line, lastPos, pos)
-        lastPos = pos
-        pos = string.find(line, ",", pos + 1)
-        margin_b_relative, margin_b = parseLayerMarginAndTheirMode(line, lastPos, pos)
+        margin_v_relative, margin_v = parseLayerMarginAndMode(line, lastPos, pos)
+        if commaCount >= 10 then
+          local pos_bk = pos
+          local lastPos_bk = lastPos
+          lastPos = pos
+          pos = string.find(line, ",", pos + 1)
+          if not verifyLayerMargin(line, lastPos, pos) then
+            pos = pos_bk
+            lastPos = lastPos_bk
+          end
+        end
         text = string.sub(line, pos + 1)
         layer = validNum(layer)
         startTimeOffset = validNum(startTimeOffset)
         endTimeOffset = validNum(endTimeOffset)
         margin_l = validNum(margin_l)
         margin_r = validNum(margin_r)
-        margin_t = validNum(margin_t)
-        margin_b = validNum(margin_b)
-        return storeNewLineInfo(setName, tempName, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+        margin_v = validNum(margin_v)
+        return storeNewLineInfo(setName, tempName, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
       end
     end
   elseif string.sub(line, 1, 1) == "$" then
@@ -806,14 +592,10 @@ generateCFText = function()
           result = result .. "+"
         end
         result = result .. (cur.margin_r[k] .. ",")
-        if cur.margin_t_relative[k] and cur.margin_t[k] >= 0 then
+        if cur.margin_v_relative[k] and cur.margin_v[k] >= 0 then
           result = result .. "+"
         end
-        result = result .. (cur.margin_t[k] .. ",")
-        if cur.margin_b_relative[k] and cur.margin_b[k] >= 0 then
-          result = result .. "+"
-        end
-        result = result .. (cur.margin_b[k] .. "," .. cur.text[k] .. "\n")
+        result = result .. (cur.margin_v[k] .. "," .. cur.text[k] .. "\n")
       end
       result = result .. "\n"
     end
@@ -953,7 +735,7 @@ applyTemplate = function(subtitle, selected, active)
     local li = sel2[i]
     local line = subtitle[li]
     for k = 1, currentTemplate.lineCount do
-      local thisLayer = subTemplate(line, k)
+      local thisLayer = applyTemplate_Line(line, k)
       subtitle.insert(li + k - 1, thisLayer)
     end
     if currentTemplate.lineCount > 0 and not retainOriginalLines then
@@ -961,7 +743,7 @@ applyTemplate = function(subtitle, selected, active)
     end
   end
 end
-subTemplate = function(line, i)
+applyTemplate_Line = function(line, i)
   local result = copyTable(line)
   result.comment = false
   local style = styleList[result.style]
@@ -993,30 +775,20 @@ subTemplate = function(line, i)
   else
     result.margin_r = currentTemplate.margin_r[i]
   end
-  if currentTemplate.margin_t_relative[i] then
-    if result.margin_t ~= 0 or currentTemplate.margin_t[i] == 0 then
-      result.margin_t = result.margin_t + currentTemplate.margin_t[i]
+  if currentTemplate.margin_v_relative[i] then
+    if result.margin_t ~= 0 or currentTemplate.margin_v[i] == 0 then
+      result.margin_t = result.margin_t + currentTemplate.margin_v[i]
     else
-      result.margin_t = style.margin_t + currentTemplate.margin_t[i]
+      result.margin_t = style.margin_t + currentTemplate.margin_v[i]
     end
   else
-    result.margin_t = currentTemplate.margin_t[i]
-  end
-  if currentTemplate.margin_b_relative[i] then
-    if result.margin_b ~= 0 or currentTemplate.margin_b[i] == 0 then
-      result.margin_b = result.margin_b + currentTemplate.margin_b[i]
-    else
-      result.margin_b = style.margin_b + currentTemplate.margin_b[i]
-    end
-  else
-    result.margin_b = currentTemplate.margin_b[i]
+    result.margin_t = currentTemplate.margin_v[i]
   end
   result.text = currentTemplate.text[i] .. result.text
   result.layer = greaterNum(result.layer, 0)
   result.margin_l = greaterNum(result.margin_l, 0)
   result.margin_r = greaterNum(result.margin_r, 0)
   result.margin_t = greaterNum(result.margin_t, 0)
-  result.margin_b = greaterNum(result.margin_b, 0)
   return result
 end
 templateApplyingFunction = function(subtitle, selected, active)
@@ -1099,6 +871,7 @@ currentPage = 1
 newTemplate_Set = ""
 newTemplate_Template = ""
 newTemplate_Replace = true
+newTemplate_FullLayout = false
 managerDialog = {
   {
     class = "label",
@@ -1115,216 +888,6 @@ managerDialog = {
     width = 70,
     height = 10,
     name = "templateBox",
-    text = ""
-  }
-}
-newTemplateDialog = {
-  {
-    class = "label",
-    x = 0,
-    y = 0,
-    width = 1,
-    height = 1,
-    label = "Set name: "
-  },
-  {
-    class = "edit",
-    x = 1,
-    y = 0,
-    width = 2,
-    height = 1,
-    name = "setName",
-    text = ""
-  },
-  {
-    class = "label",
-    x = 3,
-    y = 0,
-    width = 1,
-    height = 1,
-    label = "Template: "
-  },
-  {
-    class = "edit",
-    x = 4,
-    y = 0,
-    width = 3,
-    height = 1,
-    name = "templateName",
-    text = ""
-  }
-}
-newTemplateDialogTemplate = {
-  {
-    class = "label",
-    x = 0,
-    y = 1,
-    width = 1,
-    height = 1,
-    label = "Timing offset: "
-  },
-  {
-    class = "intedit",
-    x = 1,
-    y = 1,
-    width = 1,
-    height = 1,
-    name = "startTimeOffset",
-    value = 0
-  },
-  {
-    class = "intedit",
-    x = 2,
-    y = 1,
-    width = 1,
-    height = 1,
-    name = "endTimeOffset",
-    value = 0
-  },
-  {
-    class = "label",
-    x = 0,
-    y = 2,
-    width = 1,
-    height = 1,
-    label = "Layer: "
-  },
-  {
-    class = "dropdown",
-    x = 1,
-    y = 2,
-    width = 1,
-    height = 1,
-    name = "layerRelative",
-    items = {
-      "Absolute",
-      "Relative"
-    },
-    value = "Absolute"
-  },
-  {
-    class = "intedit",
-    x = 2,
-    y = 2,
-    width = 1,
-    height = 1,
-    name = "layer",
-    value = 0
-  },
-  {
-    class = "label",
-    x = 3,
-    y = 1,
-    width = 1,
-    height = 1,
-    label = "Style: "
-  },
-  {
-    class = "dropdown",
-    x = 4,
-    y = 1,
-    width = 1,
-    height = 1,
-    name = "style",
-    items = { },
-    value = ""
-  },
-  {
-    class = "label",
-    x = 3,
-    y = 2,
-    width = 1,
-    height = 1,
-    label = "Margins: "
-  },
-  {
-    class = "dropdown",
-    x = 4,
-    y = 2,
-    width = 1,
-    height = 1,
-    name = "marginRelative",
-    items = {
-      "Absolute",
-      "Relative"
-    },
-    value = "Absolute"
-  },
-  {
-    class = "label",
-    x = 5,
-    y = 1,
-    width = 1,
-    height = 1,
-    label = "Left: "
-  },
-  {
-    class = "label",
-    x = 5,
-    y = 2,
-    width = 1,
-    height = 1,
-    label = "Right: "
-  },
-  {
-    class = "intedit",
-    x = 6,
-    y = 1,
-    width = 1,
-    height = 1,
-    name = "margin_l",
-    value = 0
-  },
-  {
-    class = "intedit",
-    x = 6,
-    y = 2,
-    width = 1,
-    height = 1,
-    name = "margin_r",
-    value = 0
-  },
-  {
-    class = "label",
-    x = 7,
-    y = 1,
-    width = 1,
-    height = 1,
-    label = "Top: "
-  },
-  {
-    class = "label",
-    x = 7,
-    y = 2,
-    width = 1,
-    height = 1,
-    label = "Bottom: "
-  },
-  {
-    class = "intedit",
-    x = 8,
-    y = 1,
-    width = 1,
-    height = 1,
-    name = "margin_t",
-    value = 0
-  },
-  {
-    class = "intedit",
-    x = 8,
-    y = 2,
-    width = 1,
-    height = 1,
-    name = "margin_b",
-    value = 0
-  },
-  {
-    class = "textbox",
-    x = 9,
-    y = 1,
-    width = 30,
-    height = 2,
-    name = "text",
     text = ""
   }
 }
@@ -1372,10 +935,12 @@ selectTemplateDialog = {
     value = ""
   }
 }
-newTemplate_Load = function(subtitle, selected, active)
+editTemplate = function(subtitle, selected, active)
+  return newTemplate_Load(subtitle, selected, active, true)
+end
+newTemplate_Load = function(subtitle, selected, active, loadNames)
   local setSelect = ""
   local templateSelect = ""
-  local layerSelect = { }
   selectSetDialog[2]["items"] = getSetList()
   if #selectSetDialog[2]["items"] > 1 then
     selectSetDialog[2]["value"] = selectSetDialog[2]["items"][1]
@@ -1383,6 +948,7 @@ newTemplate_Load = function(subtitle, selected, active)
       "OK",
       "Cancel"
     }, {
+      ok = "OK",
       cancel = "Cancel"
     })
     if pressed == "OK" then
@@ -1395,23 +961,67 @@ newTemplate_Load = function(subtitle, selected, active)
     selectTemplateDialog[2]["items"] = getTemplateList(setSelect)
     if #selectTemplateDialog[2]["items"] > 1 then
       selectTemplateDialog[2]["value"] = selectTemplateDialog[2]["items"][1]
-      local pressed, results = aegisub.dialog.display(selectTemplateDialog, {
-        "OK",
-        "Cancel"
-      }, {
-        cancel = "Cancel"
-      })
-      if pressed == "OK" then
-        templateSelect = results["select"]
-      end
-    elseif #selectTemplateDialog[2]["items"] == 1 then
-      templateSelect = selectTemplateDialog[2]["items"][1]
     end
-    if templateSelect ~= "" then
-      loadTemplate(setSelect, templateSelect)
+    local pressed, results = aegisub.dialog.display(selectTemplateDialog, {
+      "OK",
+      "Cancel"
+    }, {
+      ok = "OK",
+      cancel = "Cancel"
+    })
+    if pressed == "OK" then
+      templateSelect = results["select"]
+      if templateSelect ~= "" then
+        loadTemplate(setSelect, templateSelect)
+      else
+        loadEmptyTemplate()
+      end
+      if loadNames then
+        newTemplate_Set = setSelect
+        newTemplate_Template = templateSelect
+      end
     end
   end
   return newTemplate(subtitle, selected, active)
+end
+removeTemplateDialog = function()
+  local setSelect = ""
+  local templateSelect = ""
+  selectSetDialog[2]["items"] = getSetList()
+  if #selectSetDialog[2]["items"] > 1 then
+    selectSetDialog[2]["value"] = selectSetDialog[2]["items"][1]
+    local pressed, results = aegisub.dialog.display(selectSetDialog, {
+      "OK",
+      "Cancel"
+    }, {
+      ok = "OK",
+      cancel = "Cancel"
+    })
+    if pressed == "OK" then
+      setSelect = results["select"]
+    end
+  elseif #selectSetDialog[2]["items"] == 1 then
+    setSelect = selectSetDialog[2]["items"][1]
+  end
+  if setSelect ~= "" then
+    selectTemplateDialog[2]["items"] = getTemplateList(setSelect)
+    if #selectTemplateDialog[2]["items"] > 1 then
+      selectTemplateDialog[2]["value"] = selectTemplateDialog[2]["items"][1]
+    end
+    local pressed, results = aegisub.dialog.display(selectTemplateDialog, {
+      "OK",
+      "Cancel"
+    }, {
+      ok = "OK",
+      cancel = "Cancel"
+    })
+    if pressed == "OK" then
+      templateSelect = results["select"]
+      deleteTemplate(setSelect, templateSelect)
+      checkSanity()
+      return storeConfig()
+    end
+  end
 end
 parseTemplateFromLine_Layer = function(value1, value2)
   local value = value2
@@ -1426,17 +1036,12 @@ end
 parseTemplateFromLine_Margin = function(value1, value2)
   local value = value2
   local relative = false
-  local minOffset = 35
-  if value2 >= minOffset or value1 == value2 then
-    relative = true
-    value = value2 - value1
-  end
   return relative, value
 end
 parseTemplateFromLine = function(original, target, tempStorage)
   local text, style = "", ""
-  local layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-  local layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = false, false, false, false, false
+  local layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_v = 0, 0, 0, 0, 0, 0
+  local layer_relative, margin_l_relative, margin_r_relative, margin_v_relative = false, false, false, false
   startTimeOffset = target.start_time - original.start_time
   endTimeOffset = target.end_time - original.end_time
   if original.style ~= target.style then
@@ -1449,9 +1054,8 @@ parseTemplateFromLine = function(original, target, tempStorage)
   layer_relative, layer = parseTemplateFromLine_Layer(original.layer, target.layer)
   margin_l_relative, margin_l = parseTemplateFromLine_Margin(original.margin_l, target.margin_l)
   margin_r_relative, margin_r = parseTemplateFromLine_Margin(original.margin_r, target.margin_r)
-  margin_t_relative, margin_t = parseTemplateFromLine_Margin(original.margin_t, target.margin_t)
-  margin_b_relative, margin_b = parseTemplateFromLine_Margin(original.margin_b, target.margin_b)
-  return storeNewLineInfoSub(tempStorage, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+  margin_v_relative, margin_v = parseTemplateFromLine_Margin(original.margin_t, target.margin_t)
+  return appendLineInfo(tempStorage, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
 end
 newTemplate_LoadFromLines = function(subtitle, selected, active)
   local firstLine = true
@@ -1482,15 +1086,8 @@ newTemplate_Store = function(results)
       local endTimeOffset = results["endTimeOffset" .. i]
       local margin_l = results["margin_l" .. i]
       local margin_r = results["margin_r" .. i]
-      local margin_t = results["margin_t" .. i]
-      local margin_b = results["margin_b" .. i]
-      margin_t = results["margin_t" .. i]
-      margin_b = results["margin_b" .. i]
+      local margin_v = results["margin_v" .. i]
       local layer_relative = stringContains(results["layer_relative" .. i], "elative")
-      local margin_l_relative = stringContains(results["margin_relative" .. i], "elative")
-      local margin_r_relative = stringContains(results["margin_relative" .. i], "elative")
-      local margin_t_relative = stringContains(results["margin_relative" .. i], "elative")
-      local margin_b_relative = stringContains(results["margin_relative" .. i], "elative")
       text = validString(text)
       style = validString(style)
       layer = validNum(layer)
@@ -1498,13 +1095,11 @@ newTemplate_Store = function(results)
       endTimeOffset = validNum(endTimeOffset)
       margin_l = validNum(margin_l)
       margin_r = validNum(margin_r)
-      margin_t = validNum(margin_t)
-      margin_b = validNum(margin_b)
-      margin_l_relative = validBoolean(margin_l_relative)
-      margin_r_relative = validBoolean(margin_r_relative)
-      margin_t_relative = validBoolean(margin_t_relative)
-      margin_b_relative = validBoolean(margin_b_relative)
-      replaceLineInfo(currentTemplate, i, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+      margin_v = validNum(margin_v)
+      local margin_l_relative = validBoolean(margin_l_relative)
+      local margin_r_relative = validBoolean(margin_r_relative)
+      local margin_v_relative = validBoolean(margin_v_relative)
+      replaceLineInfo(currentTemplate, i, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
     end
   end
 end
@@ -1527,11 +1122,14 @@ newTemplate_Save = function(results)
     return storeConfig()
   end
 end
-newTemplate_NewLine = function()
+newTemplate_MoreLine = function()
   local text, style = "", ""
-  local layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_t, margin_b = 0, 0, 0, 0, 0, 0, 0
-  local layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative = true, true, true, true, true
-  return storeNewLineInfoSub(currentTemplate, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_t, margin_b, text, layer_relative, margin_l_relative, margin_r_relative, margin_t_relative, margin_b_relative)
+  local layer, startTimeOffset, endTimeOffset, margin_l, margin_r, margin_v = 0, 0, 0, 0, 0, 0
+  local layer_relative, margin_l_relative, margin_r_relative, margin_v_relative = true, false, false, false
+  return appendLineInfo(currentTemplate, layer, startTimeOffset, endTimeOffset, style, margin_l, margin_r, margin_v, text, layer_relative, margin_l_relative, margin_r_relative, margin_v_relative)
+end
+newTemplate_LessLine = function()
+  return removeLastLineFromTemplate(currentTemplate)
 end
 newTemplate_Layout = function(pageNum, subtitle)
   local styleL = getStyleList(subtitle)
@@ -1543,7 +1141,7 @@ newTemplate_Layout = function(pageNum, subtitle)
       y = 0,
       width = 1,
       height = 1,
-      label = "Set name: "
+      label = "     Set:"
     },
     {
       class = "edit",
@@ -1560,7 +1158,7 @@ newTemplate_Layout = function(pageNum, subtitle)
       y = 0,
       width = 1,
       height = 1,
-      label = "Template: "
+      label = "Template:"
     },
     {
       class = "edit",
@@ -1573,7 +1171,7 @@ newTemplate_Layout = function(pageNum, subtitle)
     },
     {
       class = "checkbox",
-      x = 8,
+      x = 7,
       y = 0,
       width = 5,
       height = 1,
@@ -1586,7 +1184,7 @@ newTemplate_Layout = function(pageNum, subtitle)
   local lineEnd = smallerNum(pageNum * linesPerPageLimit, currentTemplate.lineCount)
   local i = 1
   for l = lineStart, lineEnd do
-    local baseIndex = (i - 1) * 19 + 6
+    local baseIndex = (i - 1) * 11 + 6
     local baseID = l
     local baseY = i * 2 - 1
     i = i + 1
@@ -1596,7 +1194,7 @@ newTemplate_Layout = function(pageNum, subtitle)
       y = baseY,
       width = 1,
       height = 1,
-      label = "Timing offset: "
+      label = "Timing:"
     }
     layout[baseIndex + 2] = {
       class = "intedit",
@@ -1622,7 +1220,7 @@ newTemplate_Layout = function(pageNum, subtitle)
       y = baseY + 1,
       width = 1,
       height = 1,
-      label = "Layer: "
+      label = " Layer:"
     }
     layout[baseIndex + 5] = {
       class = "dropdown",
@@ -1652,13 +1250,13 @@ newTemplate_Layout = function(pageNum, subtitle)
       y = baseY,
       width = 1,
       height = 1,
-      label = "Style: "
+      label = "       Style:"
     }
     layout[baseIndex + 8] = {
       class = "dropdown",
       x = 4,
       y = baseY,
-      width = 1,
+      width = 3,
       height = 1,
       name = "style" .. baseID,
       items = { },
@@ -1670,94 +1268,22 @@ newTemplate_Layout = function(pageNum, subtitle)
       y = baseY + 1,
       width = 1,
       height = 1,
-      label = "Margins: "
+      label = "  MarginV: "
     }
     layout[baseIndex + 10] = {
-      class = "dropdown",
+      class = "intedit",
       x = 4,
       y = baseY + 1,
-      width = 1,
+      width = 3,
       height = 1,
-      name = "margin_relative" .. baseID,
-      items = {
-        "Absolute",
-        "Relative"
-      },
-      value = booleanToRelativeAbsolute(currentTemplate.margin_b_relative[baseID])
+      name = "margin_v" .. baseID,
+      value = currentTemplate.margin_v[baseID]
     }
     layout[baseIndex + 11] = {
-      class = "label",
-      x = 5,
-      y = baseY,
-      width = 1,
-      height = 1,
-      label = "Left: "
-    }
-    layout[baseIndex + 12] = {
-      class = "label",
-      x = 5,
-      y = baseY + 1,
-      width = 1,
-      height = 1,
-      label = "Right: "
-    }
-    layout[baseIndex + 13] = {
-      class = "intedit",
-      x = 6,
-      y = baseY,
-      width = 1,
-      height = 1,
-      name = "margin_l" .. baseID,
-      value = currentTemplate.margin_l[baseID]
-    }
-    layout[baseIndex + 14] = {
-      class = "intedit",
-      x = 6,
-      y = baseY + 1,
-      width = 1,
-      height = 1,
-      name = "margin_r" .. baseID,
-      value = currentTemplate.margin_r[baseID]
-    }
-    layout[baseIndex + 15] = {
-      class = "label",
-      x = 7,
-      y = baseY,
-      width = 1,
-      height = 1,
-      label = "Top: "
-    }
-    layout[baseIndex + 16] = {
-      class = "label",
-      x = 7,
-      y = baseY + 1,
-      width = 1,
-      height = 1,
-      label = "Bottom: "
-    }
-    layout[baseIndex + 17] = {
-      class = "intedit",
-      x = 8,
-      y = baseY,
-      width = 1,
-      height = 1,
-      name = "margin_t" .. baseID,
-      value = currentTemplate.margin_t[baseID]
-    }
-    layout[baseIndex + 18] = {
-      class = "intedit",
-      x = 8,
-      y = baseY + 1,
-      width = 1,
-      height = 1,
-      name = "margin_b" .. baseID,
-      value = currentTemplate.margin_b[baseID]
-    }
-    layout[baseIndex + 19] = {
       class = "textbox",
-      x = 9,
+      x = 7,
       y = baseY,
-      width = 25,
+      width = 35,
       height = 2,
       name = "text" .. baseID,
       text = currentTemplate.text[baseID]
@@ -1771,7 +1297,7 @@ newTemplate_Layout = function(pageNum, subtitle)
 end
 newTemplate = function(subtitle, selected, active)
   if currentTemplate.lineCount < 1 then
-    newTemplate_NewLine()
+    newTemplate_MoreLine()
   end
   local pageCount = math.ceil(currentTemplate.lineCount / linesPerPageLimit)
   if currentPage > pageCount then
@@ -1781,21 +1307,14 @@ newTemplate = function(subtitle, selected, active)
     "Save",
     "Load",
     "Load selected lines",
-    "New line",
-    "Main",
-    "Exit"
+    "+lines",
+    "-lines"
   }
   if pageCount > 1 then
-    buttons = {
-      "Save",
-      "Load",
-      "Load selected lines",
-      "New line",
-      "Next page",
-      "Main",
-      "Exit"
-    }
+    table.insert(buttons, "Next page")
   end
+  table.insert(buttons, "Main")
+  table.insert(buttons, "Exit")
   local pressed, results = aegisub.dialog.display(newTemplate_Layout(currentPage, subtitle), buttons, {
     ok = "Save",
     cancel = "Exit"
@@ -1815,9 +1334,21 @@ newTemplate = function(subtitle, selected, active)
       currentPage = currentPage + 1
     end
     return newTemplate(subtitle, selected, active)
-  elseif pressed == "New line" then
+  elseif pressed == "+lines" then
     newTemplate_Store(results)
-    newTemplate_NewLine()
+    newTemplate_MoreLine()
+    return newTemplate(subtitle, selected, active)
+  elseif pressed == "-lines" then
+    newTemplate_Store(results)
+    newTemplate_LessLine()
+    return newTemplate(subtitle, selected, active)
+  elseif pressed == "Switch to full layout" then
+    newTemplate_Store(results)
+    newTemplate_FullLayout = true
+    return newTemplate(subtitle, selected, active)
+  elseif pressed == "Switch to compact layout" then
+    newTemplate_Store(results)
+    newTemplate_FullLayout = false
     return newTemplate(subtitle, selected, active)
   elseif pressed == "Main" then
     return templateManager(subtitle, selected, active)
@@ -1830,6 +1361,8 @@ templateManager = function(subtitle, selected, active)
   local pressed, results = aegisub.dialog.display(managerDialog, {
     "Save",
     "New template",
+    "Edit template",
+    "Remove template",
     "Exit"
   }, {
     cancel = "Exit"
@@ -1841,6 +1374,10 @@ templateManager = function(subtitle, selected, active)
   elseif pressed == "New template" then
     loadEmptyTemplate()
     return newTemplate(subtitle, selected, active)
+  elseif pressed == "Edit template" then
+    return editTemplate(subtitle, selected, active)
+  elseif pressed == "Remove template" then
+    return removeTemplateDialog(subtitle, selected, active)
   elseif pressed == "Hue" then
     for i = 1, 100000 do
       local bafsdfsdfg = getStyleList(subtitle)
