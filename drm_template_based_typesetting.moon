@@ -6,7 +6,7 @@
 export script_name        = "Template-based typesetting tool"
 export script_description = "Create a template, time the signs, and apply it to them; that's all. It's useful when there're many similar signs, or you want to keep consistent between scripts."
 export script_author      = "dreamer2908"
-export script_version     = "0.3.0"
+export script_version     = "0.3.1"
 
 configFile = "drm_template_based_typesetting.conf"
 absolutePath = false
@@ -22,6 +22,8 @@ local *
 
 -- makes a copy of table t and return. Super easy (it took like 15s to write)
 copyTable = (t) ->
+	if type(t) ~= "table"
+		return t
 	r = {}
 	for i,v in pairs(t)
 		r[i] = v
@@ -30,6 +32,8 @@ copyTable = (t) ->
 -- This one will blow if the table contains circles like Table1.a -> Table1,
 -- Table1.Table2.a -> Table1, or Table1.a -> Table2 and Table2.b -> Table1, etc.
 copyTableRecursive = (t) ->
+	if type(t) ~= "table"
+		return t
 	r = {}
 	for i,v in pairs(t)
 		if type(v) ~= "table"
@@ -37,11 +41,48 @@ copyTableRecursive = (t) ->
 		else r[i] = copyTable2(v)
 	return r
 
--- This one is supposed to be smart
--- TODO: make it smart -> soon(tm)
-copyTableDeep = (t) ->
-	r = {}
-	return r
+-- This one is supposed to be smart and to handle circles nicely. Here is how it handles them: 
+-- Each time it copies a table, it records the "address" (or whatever Lua uses to point a table variable to the actual storage) 
+-- of the source table in oldTableIndex and the "address" of the copied table in newTableIndex.
+-- Before starting to copy any table, it looks it up in oldTableIndex: if it's there, the table has been copied already, so
+-- we only need to take the "address" of the copied one from newTableIndex and point the entry in new table to it;
+-- if it's not there, we'll copy it normally. The source table and the new table are the first entries in oldTableIndex and newTableIndex, respectedly.
+-- For example, we have Table1.a -> Table1, and we're making a copy of it (Table1c). As Table1 is in oldTableIndex, 
+-- it will look up the address of the copied table in newTableIndex, which is Table1c's, then make an entry called "a" in Table1c
+-- and point it to that address. Now we have Table1c.a -> Table1c. It works similarly for Table1.Table2.a -> Table1.
+-- For Table1.a -> Table2, Table2.aa -> Table2, and Table2.b -> Table1: at first, it will make a copy of Table1 and Table2 (Table1c and Table2c) 
+-- and points Table1c.a to Table2c. When copying Table2, it finds out that entry aa points to Table2, so it makes entry Table2c.aa 
+-- and points it to Table2c. It also finds out that b points to Table1, so it makes entry Table2c.b and points it to Table1c.
+-- If the function fails to detect circles, it will probably overflow the call stack (around 65500 in Lua 5.1). 
+-- In all my tests, it seems to work fine.
+
+copyTableDeepSub = (source, oldIndex, newIndex) ->
+	if type(source) ~= "table"
+		return source
+    copy = {}
+    table.insert(oldIndex, source)
+    table.insert(newIndex, copy)
+    for i,v in pairs(source)
+        if type(v) ~= "table"
+            copy[i] = v
+        else
+            found = false
+            if #oldIndex > 0
+                for j = 1, #oldIndex
+                    if v == oldIndex[j]
+                        copy[i] = newIndex[j]
+                        found = true
+            if not found
+                copy[i] = copyTableDeepSub(v, oldIndex, newIndex)
+    return copy
+
+copyTableDeep = (source) ->
+	if type(source) ~= "table"
+		return source
+	oldTableIndex = {}
+	newTableIndex = {}
+    copy = copyTableDeepSub(source, oldTableIndex, newTableIndex)            
+    return copy
 
 getIndexListOfTable = (t) ->
 	list = {}
@@ -191,7 +232,7 @@ currentTemplate = emptyTemplate
 -------                Functions to work with template               -------
 ----------------------------------------------------------------------------
 
--- For failback
+-- For failback or whatever reason
 loadEmptyTemplate = () ->
 	currentTemplate = copyTable(emptyTemplate)
 
@@ -315,8 +356,8 @@ storeNewLineInfo = (set, index, layer, startTimeOffset, endTimeOffset, style, ma
 	-- I attempted to debug by adding " debug info: real count "..#cur.text to the third last line of generateCFText.
 	-- It showed that all tables had the same number of line (6, the same as the longest template), but lineCount was normal, not affected.
 	-- I thought table.copy was buggy, so I wrote copyTable. It did work correctly a few times, and then, bang!! It happened again.
-	-- Actually, there's no way one can write a buggy table copying function because it's very simple (my implemention has only 5 lines)
-	-- I'd also looked at utils.lua: table.copy is the same (except for variable names).
+	-- I tested table.copy and saw no problem.
+	-- Actually, there's no way one can write a buggy table copying function because it's very simple (my implemention has only 7 lines)
 	-- I suspected all tables pointed to the same one, but that couldn't explain the lineCount.
 	-- In the end, I hardcoded the empty template here (again). It worked like a charm.
 	if storage[set][index] == nil
