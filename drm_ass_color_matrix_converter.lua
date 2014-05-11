@@ -1,8 +1,8 @@
 script_name = "Color Matrix Converter"
 script_description = "Adjusts the color so that subtitles made with matrix BT.601 can fit in scripts made with matrix BT.709, or vice versa"
 script_author = "dreamer2908"
-script_version = "0.1.2"
-local createMatrix, matrixMultiplication, printMatrix, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, bt601_to_bt709, bt709_to_bt601, mode, matrixTable, modeTable, tableMode, fieldTable, hexTable, hexTableInit, Dec2Hex, DecToHex, HexToDec, convertColor, convertLine, drm_convertAll, drm_convertSelected, drm_convertDialog, drm_convertStyles, drm_setYCyCrField, convertSubtitle, mainDialog, macro_function, macro_validation
+script_version = "0.1.4"
+local createMatrix, matrixMultiplication, matrixScalarMultiplication, matrixInverse3x3, printMatrix, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt2020, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt2020, bt601_to_bt709, bt709_to_bt601, bt601_to_bt2020, bt709_to_bt2020, bt2020_to_bt601, bt2020_to_bt709, mode, matrixTable, modeTable, tableMode, fieldTable, convertAll, convertSelected, convertDialog, convertStyles, setYCyCrField, roundAndClip, convertColor, convertLine, convertSubtitle, mainDialog, macro_function
 createMatrix = function(n, m)
   if n == 3 and m == 1 then
     return {
@@ -56,6 +56,41 @@ matrixMultiplication = function(m1, m2)
   end
   return resultMatrix
 end
+matrixScalarMultiplication = function(m1, scalar)
+  local resultMatrix = createMatrix(#m1, #m1[1])
+  for i = 1, #m1 do
+    for j = 1, #m1[1] do
+      resultMatrix[i][j] = m1[i][j] * scalar
+    end
+  end
+  return resultMatrix
+end
+matrixInverse3x3 = function(m1)
+  if #m1 ~= 3 or #m1[1] ~= 3 then
+    return m1
+  end
+  local resultMatrix = createMatrix(3, 3)
+  local a = m1[1][1]
+  local b = m1[1][2]
+  local c = m1[1][3]
+  local d = m1[2][1]
+  local e = m1[2][2]
+  local f = m1[2][3]
+  local g = m1[3][1]
+  local h = m1[3][2]
+  local i = m1[3][3]
+  local det_1 = 1.0 / (a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g))
+  resultMatrix[1][1] = det_1 * (e * i - f * h)
+  resultMatrix[1][2] = det_1 * (c * h - b * i)
+  resultMatrix[1][3] = det_1 * (b * f - c * e)
+  resultMatrix[2][1] = det_1 * (f * g - d * i)
+  resultMatrix[2][2] = det_1 * (a * i - c * g)
+  resultMatrix[2][3] = det_1 * (c * d - a * f)
+  resultMatrix[3][1] = det_1 * (d * h - e * g)
+  resultMatrix[3][2] = det_1 * (b * g - a * h)
+  resultMatrix[3][3] = det_1 * (a * e - b * d)
+  return resultMatrix
+end
 printMatrix = function(m)
   for i = 1, #m do
     local s = ""
@@ -65,153 +100,210 @@ printMatrix = function(m)
     print(s)
   end
 end
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601 = createMatrix(3, 3)
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709 = createMatrix(3, 3)
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709 = createMatrix(3, 3)
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601 = createMatrix(3, 3)
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[1][1] = 65.738 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[1][2] = 129.057 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[1][3] = 25.046 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[2][1] = -37.945 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[2][2] = -74.494 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[2][3] = 112.439 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[3][1] = 112.439 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[3][2] = -94.154 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601[3][3] = -18.285 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[1][1] = 46.742 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[1][2] = 157.243 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[1][3] = 15.874 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[2][1] = -25.765 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[2][2] = -86.674 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[2][3] = 112.439 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[3][1] = 112.439 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[3][2] = -102.129 / 256.0
-digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709[3][3] = -10.310 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[1][1] = 298.082 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[1][2] = 0 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[1][3] = 458.942 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[2][1] = 298.082 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[2][2] = -54.592 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[2][3] = -136.425 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[3][1] = 298.082 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[3][2] = 540.775 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709[3][3] = 0 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[1][1] = 298.082 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[1][2] = 0 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[1][3] = 408.583 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[2][1] = 298.082 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[2][2] = -100.291 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[2][3] = -208.120 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[3][1] = 298.082 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[3][2] = 516.411 / 256.0
-digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601[3][3] = 0 / 256.0
+digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601 = {
+  {
+    65.738,
+    129.057,
+    25.046
+  },
+  {
+    -37.945,
+    -74.494,
+    112.439
+  },
+  {
+    112.439,
+    -94.154,
+    -18.285
+  }
+}
+digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709 = {
+  {
+    46.742,
+    157.243,
+    15.874
+  },
+  {
+    -25.765,
+    -86.674,
+    112.439
+  },
+  {
+    112.439,
+    -102.129,
+    -10.310
+  }
+}
+digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt2020 = {
+  {
+    57.757,
+    149.064,
+    13.038
+  },
+  {
+    -31.400,
+    -81.039,
+    112.439
+  },
+  {
+    112.439,
+    -103.396,
+    -9.043
+  }
+}
+digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601 = {
+  {
+    298.082,
+    0,
+    408.583
+  },
+  {
+    298.082,
+    -100.291,
+    -208.120
+  },
+  {
+    298.082,
+    516.411,
+    0
+  }
+}
+digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709 = {
+  {
+    298.082,
+    0,
+    458.942
+  },
+  {
+    298.082,
+    -54.592,
+    -136.425
+  },
+  {
+    298.082,
+    540.775,
+    0
+  }
+}
+digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt2020 = {
+  {
+    298.082,
+    0,
+    429.741
+  },
+  {
+    298.082,
+    -47.955,
+    -166.509
+  },
+  {
+    298.082,
+    548.294,
+    0
+  }
+}
+digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601 = matrixScalarMultiplication(digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601, 1 / 256.0)
+digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709 = matrixScalarMultiplication(digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709, 1 / 256.0)
+digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt2020 = matrixScalarMultiplication(digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt2020, 1 / 256.0)
+digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601 = matrixScalarMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, 1 / 256.0)
+digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709 = matrixScalarMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, 1 / 256.0)
+digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt2020 = matrixScalarMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt2020, 1 / 256.0)
 bt601_to_bt709 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601)
 bt709_to_bt601 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709)
+bt601_to_bt2020 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt2020, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt601)
+bt709_to_bt2020 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt2020, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt709)
+bt2020_to_bt601 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt601, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt2020)
+bt2020_to_bt709 = matrixMultiplication(digital_ycbcr_to_digital_8_bit_rgb_full_range_using_bt709, digital_8_bit_rgb_full_range_to_digital_ycbcr_using_bt2020)
 mode = 1
 matrixTable = {
   bt601_to_bt709,
-  bt709_to_bt601
+  bt709_to_bt601,
+  bt601_to_bt2020,
+  bt709_to_bt2020,
+  bt2020_to_bt601,
+  bt2020_to_bt709
 }
 modeTable = {
   "BT.601 to BT.709",
-  "BT.709 to BT.601"
+  "BT.709 to BT.601",
+  "BT.601 to BT.2020",
+  "BT.709 to BT.2020",
+  "BT.2020 to BT.601",
+  "BT.2020 to BT.709"
 }
-tableMode = {
-  ["BT.601 to BT.709"] = 1,
-  ["BT.709 to BT.601"] = 2
-}
+do
+  local _tbl_0 = { }
+  for k, v in ipairs(modeTable) do
+    _tbl_0[v] = k
+  end
+  tableMode = _tbl_0
+end
 fieldTable = {
   "TV.709",
-  "TV.601"
+  "TV.601",
+  "TV.2020",
+  "TV.2020",
+  "TV.601",
+  "TV.709"
 }
-hexTable = { }
-hexTableInit = 0
-Dec2Hex = function(dec)
-  local lookupTable = {
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F"
-  }
-  dec = math.floor(dec)
-  if dec < 16 then
-    if dec > -1 then
-      return lookupTable[dec + 1]
+convertAll = false
+convertSelected = true
+convertDialog = false
+convertStyles = false
+setYCyCrField = false
+roundAndClip = function(value)
+  if value < 0 then
+    return 0
+  end
+  if value > 255 then
+    return 255
+  end
+  return math.floor(value + 0.5)
+end
+convertColor = function(colorString)
+  local sourceLen = string.len(colorString)
+  local R = 0
+  local G = 0
+  local B = 0
+  local A = ''
+  if sourceLen == 8 then
+    B = tonumber(string.sub(colorString, 3, 4), 16)
+    G = tonumber(string.sub(colorString, 5, 6), 16)
+    R = tonumber(string.sub(colorString, 7, 8), 16)
+  else
+    if sourceLen == 10 then
+      A = string.sub(colorString, 3, 4)
+      B = tonumber(string.sub(colorString, 5, 6), 16)
+      G = tonumber(string.sub(colorString, 7, 8), 16)
+      R = tonumber(string.sub(colorString, 9, 10), 16)
     else
-      return "0"
+      return colorString
     end
-  else
-    return "F"
   end
-end
-DecToHex = function(dec)
-  if dec > 255 then
-    dec = 255
-  end
-  if dec < 0 then
-    dec = 0
-  end
-  dec = math.floor(dec)
-  if hexTableInit == 1 then
-    return hexTable[dec + 1]
-  else
-    for i = 0, 255 do
-      hexTable[i + 1] = Dec2Hex(i / 16) .. Dec2Hex(i % 16)
-    end
-    hexTableInit = 1
-    return hexTable[dec + 1]
-  end
-end
-HexToDec = function(hex)
-  return tonumber(hex, 16)
-end
-convertColor = function(colorCodeString)
-  if (string.len(colorCodeString) ~= 8 and string.len(colorCodeString) ~= 10) then
-    return colorCodeString
-  end
-  local result = string.sub(colorCodeString, 1, 2)
-  colorCodeString = string.sub(colorCodeString, 3)
-  if string.len(colorCodeString) == 8 then
-    result = result .. string.sub(colorCodeString, 1, 2)
-    colorCodeString = string.sub(colorCodeString, 3)
-  end
-  local B = string.sub(colorCodeString, 1, 2)
-  local G = string.sub(colorCodeString, 3, 4)
-  local R = string.sub(colorCodeString, 5, 6)
-  local storage = createMatrix(3, 1)
-  storage[1][1] = HexToDec(R)
-  storage[2][1] = HexToDec(G)
-  storage[3][1] = HexToDec(B)
+  local storage = {
+    {
+      R
+    },
+    {
+      G
+    },
+    {
+      B
+    }
+  }
   storage = matrixMultiplication(matrixTable[mode], storage)
-  R = DecToHex(math.floor(storage[1][1] + 0.5))
-  G = DecToHex(math.floor(storage[2][1] + 0.5))
-  B = DecToHex(math.floor(storage[3][1] + 0.5))
-  return result .. B .. G .. R
+  R = roundAndClip(storage[1][1])
+  G = roundAndClip(storage[2][1])
+  B = roundAndClip(storage[3][1])
+  return string.format("&H%s%02X%02X%02X", A, B, G, R)
 end
 convertLine = function(line)
   local result = string.gsub(line, "&H%x+", convertColor)
   return result
 end
-drm_convertAll = false
-drm_convertSelected = true
-drm_convertDialog = false
-drm_convertStyles = false
-drm_setYCyCrField = false
 convertSubtitle = function(subtitle, selected, active)
   local num_lines = #subtitle
-  if drm_convertDialog or drm_convertAll then
+  if convertDialog or convertAll then
     for i = 1, num_lines do
       local line = subtitle[i]
       if line.class == "dialogue" then
@@ -220,7 +312,7 @@ convertSubtitle = function(subtitle, selected, active)
         subtitle[i] = line
       end
     end
-  elseif drm_convertSelected then
+  elseif convertSelected then
     for si, li in ipairs(selected) do
       local line = subtitle[li]
       line.text = convertLine(line.text)
@@ -228,7 +320,7 @@ convertSubtitle = function(subtitle, selected, active)
       subtitle[li] = line
     end
   end
-  if drm_convertStyles or drm_convertAll then
+  if convertStyles or convertAll then
     local style = 0
     for i = 1, num_lines do
       local line = subtitle[i]
@@ -244,7 +336,7 @@ convertSubtitle = function(subtitle, selected, active)
       end
     end
   end
-  if drm_setYCyCrField or drm_convertAll then
+  if setYCyCrField or convertAll then
     local info = 0
     local lastFieldIndex = 0
     for i = 1, num_lines do
@@ -340,11 +432,11 @@ mainDialog = {
 }
 macro_function = function(subtitle, selected, active)
   mainDialog[2]["value"] = modeTable[mode]
-  mainDialog[3]["value"] = drm_convertSelected
-  mainDialog[4]["value"] = drm_convertDialog
-  mainDialog[5]["value"] = drm_convertStyles
-  mainDialog[6]["value"] = drm_setYCyCrField
-  mainDialog[7]["value"] = drm_convertAll
+  mainDialog[3]["value"] = convertSelected
+  mainDialog[4]["value"] = convertDialog
+  mainDialog[5]["value"] = convertStyles
+  mainDialog[6]["value"] = setYCyCrField
+  mainDialog[7]["value"] = convertAll
   local pressed, results = aegisub.dialog.display(mainDialog, {
     "OK",
     "Cancel"
@@ -354,11 +446,11 @@ macro_function = function(subtitle, selected, active)
   if pressed == "OK" then
     aegisub.progress.set(math.random(100))
     mode = tableMode[results.modeselect]
-    drm_convertSelected = results.convertSelected
-    drm_convertDialog = results.convertDialog
-    drm_convertStyles = results.convertStyles
-    drm_setYCyCrField = results.setYCyCrField
-    drm_convertAll = results.convertAll
+    convertSelected = results.convertSelected
+    convertDialog = results.convertDialog
+    convertStyles = results.convertStyles
+    setYCyCrField = results.setYCyCrField
+    convertAll = results.convertAll
     convertSubtitle(subtitle, selected, active)
     aegisub.set_undo_point(script_name)
   else
@@ -366,7 +458,4 @@ macro_function = function(subtitle, selected, active)
   end
   return selected
 end
-macro_validation = function(subtitle, selected, active)
-  return true
-end
-return aegisub.register_macro(script_name, script_description, macro_function, macro_validation)
+return aegisub.register_macro(script_name, script_description, macro_function)
