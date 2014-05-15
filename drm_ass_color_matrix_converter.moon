@@ -119,18 +119,33 @@ roundAndClip = (value) ->
 -- colorString should be either &HAABBGGRR or &HBBGGRR
 -- Invalid strings will be returned as is
 convertColor = (colorString) ->
-	-- Here is the manual profiling result -- if true return colorString
-	-- TL;DR: Aegisub's lua interpreter seems to suck at nested table creation: it accounts for 2/3 of computation cost.
+	-- Here is the profiling result:
 	-- Sample: https://www.dropbox.com/s/1u2bqy1gvz1yu7c/big.7z
-	-- Total time: 30s
-	-- Color extraction: 2.4s
+	-- With Aegisub r8138 (and earlier versions), which uses lua5.1
+	-- -- TL;DR: Aegisub's lua interpreter seems to suck at creating nested tables: it accounts for 2/3 of computation cost.
+	-- -- Total time: 30s
+	-- -- Color extraction: 2.4s (util.extract_color is unsurprisingly slower: 3.1s)
+	-- -- The actual calculation: 25.8s
+	-- -- -- Matrix creation: 9s. Yes, it's damn 9s.
+	-- -- -- Multiplication: 14.3s (this uses one matrix creation)
+	-- -- -- Rounding and clipping: 2.5s
+	-- -- Generating result: 2.7s
+	-- With Aegisub r8330 (and later versions), which uses LuaJIT
+	-- -- Total time: 8.2s
+	-- -- Color extraction: 1.4s
+	-- -- The actual calculation: 3.1s
+	-- -- -- Matrix creation: 1.5s. (overwhelmingly faster than lua5.1)
+	-- -- -- Multiplication: 1.6s (this uses one matrix creation)
+	-- -- -- Rounding and clipping: 0.0s (Yup!)
+	-- -- Generating result: 3.7s <~~ What?!
+	-- if true return colorString -- test
 	sourceLen = string.len(colorString)
 	R = 0
 	G = 0
 	B = 0
 	A = ''
 	if sourceLen == 8
-		-- R, G, B, A = util.extract_color(colorString..'&') -- Not gonna use. This Aegisub built-in function is actually slower: ~3.1s
+		-- R, G, B, A = util.extract_color(colorString..'&') -- Slower, not gonna use.
 		B = tonumber(string.sub(colorString, 3, 4), 16)
 		G = tonumber(string.sub(colorString, 5, 6), 16)
 		R = tonumber(string.sub(colorString, 7, 8), 16)
@@ -142,14 +157,12 @@ convertColor = (colorString) ->
 	else
 		return colorString
 
-	-- The actual calculation: 25.8s
-	storage = {{R}, {G}, {B}} -- Matrix creation: 9s. Yes, it's damn 9s. How can lua can be this slow with nested table?!
-	storage = matrixMultiplication(matrixTable[mode], storage) -- Multiplication: 14.3s (this uses one matrix creation)
-	R = roundAndClip(storage[1][1]) -- Rounding and clipping: 2.5s
+	storage = {{R}, {G}, {B}}
+	storage = matrixMultiplication(matrixTable[mode], storage)
+	R = roundAndClip(storage[1][1])
 	G = roundAndClip(storage[2][1])
 	B = roundAndClip(storage[3][1])
 
-	-- Generating result: 2.7s
 	return string.format("&H%s%02X%02X%02X", A, B, G, R)
 
 convertLine = (line) ->
