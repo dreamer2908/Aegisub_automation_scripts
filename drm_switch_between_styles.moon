@@ -7,11 +7,11 @@
 export script_name        = "Switch to another style"
 export script_description = "Switch selected lines to another style without breaking it."
 export script_author      = "dreamer2908"
-export script_version     = "0.1.0"
+export script_version     = "0.1.1"
 
 local *
 
-include("utils.lua")
+util = require 'aegisub.util'
 
 styleList = {}
 
@@ -152,9 +152,9 @@ replaceStyle = (subtitle, selected, styleName) ->
 				else
 					tags ..= "\\s0"
 		if newStyle.scale_x ~= oldStyle.scale_x and not overiddenList.scale_x and not ignoreList.scale_x 
-			tags ..= "\\fsx"..oldStyle.scale_x
+			tags ..= "\\fscx"..oldStyle.scale_x
 		if newStyle.scale_y ~= oldStyle.scale_y and not overiddenList.scale_y and not ignoreList.scale_y 
-			tags ..= "\\fsy"..oldStyle.scale_y
+			tags ..= "\\fscy"..oldStyle.scale_y
 		if newStyle.spacing ~= oldStyle.spacing and not overiddenList.spacing and not ignoreList.spacing 
 			tags ..= "\\fsp"..oldStyle.spacing
 		if newStyle.angle ~= oldStyle.angle and not overiddenList.angle and not ignoreList.angle 
